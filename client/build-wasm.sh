@@ -9,7 +9,7 @@ if [[ ! -e './fonts/twemoji.ttf' ]]; then
     fi
 
     if [[ ! -e './fonts' ]]; then
-    mkdir './fonts'
+        mkdir './fonts'
     fi  
     ln -s "${TWEMOJI_PATH}" './fonts/twemoji.ttf'
 fi
@@ -17,7 +17,7 @@ fi
 source /opt/qt6-wasm/qtwasm_env.sh
 set -e
 
-/opt/qt6-wasm/bin/qt-cmake -B build-wasm -GNinja
+/opt/qt6-wasm/bin/qt-cmake -B build-wasm -GNinja -CMAKE_BUILD_TYPE=RelWithDebInfo
 cd build-wasm
 ninja
 
