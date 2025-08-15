@@ -1,0 +1,19 @@
+[package]
+name = "vodozemac-cpp"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "vodozemac"
+crate-type = ["staticlib"]
+
+[dependencies]
+anyhow = { version = "1.0.99", features = ["backtrace"] }
+cxx = "1.0"
+vodozemac = "0.9.0"
+
+[target.wasm32-unknown-unknown.dependencies]
+vodozemac = { version = "0.9.0", features = ["js"] }
+
+[build-dependencies]
+cxx-build = "1.0"

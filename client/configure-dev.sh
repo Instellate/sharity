@@ -1,0 +1,3 @@
+#!/bin/bash
+cmake -B build -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DQT_QML_GENERATE_QMLLS_INI=ON
+

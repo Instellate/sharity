@@ -1,0 +1,10 @@
+# Build
+build
+build-wasm
+cmake-debug-build
+cmake-release-build
+fonts
+
+# Development
+.idea
+.qmlls.ini
