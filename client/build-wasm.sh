@@ -21,7 +21,7 @@ set -e
 cd build-wasm
 ninja
 
-read -p 'Do you want to serve the files? (Requires python module http.server) [y/N]: ' ANSWER
+read -p 'Do you want to serve the files? [y/N]: ' ANSWER
 if [[ "${ANSWER}" == 'y' ]]; then
     python -m http.server 8000
 fi
