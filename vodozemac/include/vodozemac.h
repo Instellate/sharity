@@ -1,6 +1,9 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <string>
+#include <vector>
 #include <vodozemac/internals/ffi.h>
 
 namespace vodozemac {
@@ -9,6 +12,8 @@ namespace vodozemac {
 } // namespace vodozemac
 
 namespace vodozemac::olm {
+    using OlmMessage = ffi::OlmMessage;
+
     class Account {
         rust::Box<ffi::OlmAccount> _account = ffi::newOlmAccount();
 
@@ -23,6 +28,23 @@ namespace vodozemac::olm {
 
         Ed25519PublicKey ed25519Key() const;
         Curve25519PublicKey curve25519Key() const;
+
+        std::array<uint8_t, 64> sign(const std::vector<uint8_t> &message) const;
+    };
+
+    class Session {
+        rust::Box<ffi::OlmSession> _session;
+    public:
+        explicit Session(rust::Box<ffi::OlmSession> &&session) : _session(std::move(session)) {}
+
+        Session(const Account &) = delete;
+        Session(Session &&) = default;
+
+        Session &operator=(const Session &) = delete;
+        Session &operator=(Session &&) = default;
+
+        OlmMessage encrypt(const std::string &plaintext);
+        rust::Vec<uint8_t> decrypt(const OlmMessage &message);
     };
 } // namespace vodozemac::olm
 

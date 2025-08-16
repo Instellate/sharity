@@ -1,10 +1,8 @@
-use vodozemac::{
-    Curve25519PublicKey, Ed25519PublicKey,
-    olm::Account,
-    sas::{EstablishedSas, Sas, SasBytes},
-};
+use vodozemac::olm::{Account, OlmMessage, Session, SessionConfig};
+use vodozemac::sas::{EstablishedSas, Sas, SasBytes};
+use vodozemac::{Curve25519PublicKey, Ed25519PublicKey};
 
-use crate::ffi::{CxxCurve25519PublicKey, CxxEd25519PublicKey, CxxSasBytes};
+use crate::ffi::{CxxCurve25519PublicKey, CxxEd25519PublicKey, CxxOlmMessage, CxxSasBytes};
 
 #[cxx::bridge(namespace = "vodozemac::ffi")]
 mod ffi {
@@ -23,6 +21,17 @@ mod ffi {
     #[cxx_name = "SasBytes"]
     struct CxxSasBytes {
         bytes: [u8; 6],
+    }
+
+    #[cxx_name = "OlmMessage"]
+    struct CxxOlmMessage {
+        bytes: Vec<u8>,
+    }
+
+    #[cxx_name = "OlmInboundCreationResult"]
+    struct CxxOlmInboundCreationResult {
+        session: Box<OlmSession>,
+        plaintext: Vec<u8>,
     }
 
     extern "Rust" {
@@ -50,6 +59,32 @@ mod ffi {
 
         #[cxx_name = "curve25519Key"]
         fn curve25519_key(self: &OlmAccount) -> CxxCurve25519PublicKey;
+
+        #[cxx_name = "generateOneTimeKey"]
+        fn generate_one_time_key(self: &mut OlmAccount) -> CxxCurve25519PublicKey;
+
+        fn sign(self: &OlmAccount, message: &[u8]) -> [u8; 64];
+
+        #[cxx_name = "createOutboundSession"]
+        fn create_outbound_session(
+            self: &OlmAccount,
+            version: i32,
+            ik: CxxCurve25519PublicKey,
+            otk: CxxCurve25519PublicKey,
+        ) -> Box<OlmSession>;
+
+        #[cxx_name = "createInboundSession"]
+        fn create_inbound_session(
+            self: &mut OlmAccount,
+            their_identity_key: CxxCurve25519PublicKey,
+            message: &CxxOlmMessage,
+        ) -> Result<CxxOlmInboundCreationResult>;
+
+        type OlmSession;
+
+        fn encrypt(self: &mut OlmSession, plaintext: &str) -> CxxOlmMessage;
+
+        fn decrypt(self: &mut OlmSession, message: CxxOlmMessage) -> Result<Vec<u8>>;
 
         #[cxx_name = "Sas"]
         type CxxSas;
@@ -138,15 +173,101 @@ fn new_olm_account() -> Box<OlmAccount> {
 
 impl OlmAccount {
     fn ed25519_key(&self) -> ffi::CxxEd25519PublicKey {
-        ffi::CxxEd25519PublicKey {
-            bytes: *self.0.ed25519_key().as_bytes(),
-        }
+        self.0.ed25519_key().into()
     }
 
     fn curve25519_key(&self) -> ffi::CxxCurve25519PublicKey {
-        ffi::CxxCurve25519PublicKey {
-            bytes: self.0.curve25519_key().to_bytes(),
+        self.0.curve25519_key().into()
+    }
+
+    fn generate_one_time_key(&mut self) -> ffi::CxxCurve25519PublicKey {
+        let keys = self.0.generate_one_time_keys(1);
+        let key = keys.created.first().unwrap().clone();
+        key.into()
+    }
+
+    fn sign(&self, message: &[u8]) -> [u8; 64] {
+        self.0.sign(message).to_bytes()
+    }
+
+    fn create_outbound_session(
+        &self,
+        version: i32,
+        ik: CxxCurve25519PublicKey,
+        otk: CxxCurve25519PublicKey,
+    ) -> Box<OlmSession> {
+        let config = match version {
+            1 => SessionConfig::version_1(),
+            2 => SessionConfig::version_2(),
+            _ => unreachable!(),
+        };
+
+        let session = self
+            .0
+            .create_outbound_session(config, ik.into(), otk.into());
+        Box::new(OlmSession(session))
+    }
+
+    fn create_inbound_session(
+        self: &mut OlmAccount,
+        tik: CxxCurve25519PublicKey,
+        mesage: &CxxOlmMessage,
+    ) -> anyhow::Result<ffi::CxxOlmInboundCreationResult> {
+        let message = mesage.try_as_olm_message()?;
+        let OlmMessage::PreKey(pre_message) = message else {
+            return Err(anyhow::anyhow!("Message is not pre key"));
+        };
+
+        let result = self.0.create_inbound_session(tik.into(), &pre_message)?;
+
+        Ok(ffi::CxxOlmInboundCreationResult {
+            session: Box::new(OlmSession(result.session)),
+            plaintext: result.plaintext,
+        })
+    }
+}
+
+struct OlmSession(Session);
+
+impl OlmSession {
+    fn encrypt(&mut self, plaintext: &str) -> ffi::CxxOlmMessage {
+        self.0.encrypt(plaintext).into()
+    }
+
+    fn decrypt(&mut self, message: CxxOlmMessage) -> anyhow::Result<Vec<u8>> {
+        let message = message.try_into()?;
+        self.0.decrypt(&message).map_err(anyhow::Error::from)
+    }
+}
+
+impl ffi::CxxOlmMessage {
+    fn try_as_olm_message(&self) -> anyhow::Result<OlmMessage> {
+        let bytes: &[u8] = &self.bytes;
+        if bytes.len() < 8 {
+            return Err(anyhow::anyhow!("Olm message is too small"));
         }
+        let msg_type_bytes: &[u8; 8] = bytes[0..8].try_into().map_err(anyhow::Error::from)?;
+        let msg_type = usize::from_be_bytes(*msg_type_bytes);
+
+        OlmMessage::from_parts(msg_type, &bytes[8..]).map_err(anyhow::Error::from)
+    }
+}
+
+impl From<OlmMessage> for ffi::CxxOlmMessage {
+    fn from(value: OlmMessage) -> Self {
+        let (msg_type, mut msg) = value.to_parts();
+        let msg_type_bytes = msg_type.to_be_bytes();
+        msg.splice(0..0, msg_type_bytes);
+
+        ffi::CxxOlmMessage { bytes: msg }
+    }
+}
+
+impl TryFrom<CxxOlmMessage> for OlmMessage {
+    type Error = anyhow::Error;
+
+    fn try_from(value: CxxOlmMessage) -> Result<Self, Self::Error> {
+        value.try_as_olm_message()
     }
 }
 
