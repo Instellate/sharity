@@ -3,9 +3,11 @@ defmodule Sharity.Application do
   require Logger
 
   def start(_type, _args) do
-    Logger.info("Hello, world!")
+    children = [
+      {Bandit, plug: Sharity.Router, port: Application.fetch_env!(:sharity, :port)},
+      Sharity.Downloaders
+    ]
 
-    children = []
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Sharity.Supervisor)
   end
 end

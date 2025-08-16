@@ -22,10 +22,11 @@ defmodule Sharity.MixProject do
 
   defp deps do
     [
-      {:ex_hash_ring, "~> 7.0"},
       {:plug, "~> 1.18"},
       {:plug_cowboy, "~> 2.7"},
-      {:websock_adapter, "~> 0.5.8"}
+      {:websock_adapter, "~> 0.5.8"},
+      {:bandit, "~> 1.7.0"},
+      {:jason, "~> 1.4"}
     ]
   end
 
