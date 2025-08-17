@@ -118,7 +118,6 @@ void WebSocket::handleDownloaderRequest(rtc::binary &&binary) {
     if (binary.size() != 64) {
         qWarning() << "Expected 64 bytes from downloader but got" << binary.size() << "bytes";
         this->_ws.close();
-        emit closed();
         return;
     }
 
@@ -162,7 +161,6 @@ void WebSocket::handleUploaderResponse(rtc::binary &&binary) {
     if (binary.size() <= 168) {
         qWarning() << "Got a response that is less or equal to 168";
         this->_ws.close();
-        emit closed();
         return;
     }
     const auto binaryPtr = reinterpret_cast<uint8_t *>(binary.data());
@@ -181,7 +179,6 @@ void WebSocket::handleUploaderResponse(rtc::binary &&binary) {
     } catch (std::exception &e) {
         qWarning() << e.what();
         this->_ws.close();
-        emit closed();
         return;
     }
 
@@ -192,7 +189,6 @@ void WebSocket::handleUploaderResponse(rtc::binary &&binary) {
     if (this->_account.curve25519Key().bytes != receivedIdentityKey) {
         qWarning() << "The received identity key is not the same as the actual one";
         this->_ws.close();
-        emit closed();
         return;
     }
 
@@ -233,6 +229,9 @@ void WebSocket::handleEncryptedMessage(std::u8string &&message) {
     std::string type = json["type"];
     if (type == "sas_token") {
         handleSasToken(std::move(json));
+    } else if (type == "sas_confirmed") {
+        this->_otherSasConfirmed = true;
+        emit otherSasConfirmedChanged();
     } else {
         qWarning() << "Got unknown type" << type;
     }
@@ -265,8 +264,12 @@ void WebSocket::handleSasToken(nlohmann::json &&json) {
 }
 
 WebSocket::WebSocket(QObject *parent) : QObject(parent) {
-    this->_ws.onOpen([this]() {
+    this->_ws.onOpen([this] {
         qInfo() << "Connected to websocket server";
+        emit connectedChanged();
+    });
+    this->_ws.onClosed([this] {
+        qInfo() << "Websocket connection closed";
         emit connectedChanged();
     });
 }
@@ -302,6 +305,16 @@ void WebSocket::open(const QString &url) {
     this->_ws.open(fullUrl.toString().toStdString());
 }
 
+void WebSocket::confirmSas() {
+    this->_sasConfirmed = true;
+    emit sasConfirmedChanged();
+    nlohmann::json json;
+    json["type"] = "sas_confirmed";
+    sendEncrypted(json.dump());
+}
+
+void WebSocket::declineSas() { this->_ws.close(); }
+
 QStringList WebSocket::stunServers() const { return this->_stunServers; }
 
 QString WebSocket::publicKey() const {
@@ -314,6 +327,8 @@ bool WebSocket::encrypted() const { return this->_encrypted; }
 bool WebSocket::established() const { return this->_established; }
 bool WebSocket::connected() const { return this->_ws.isOpen(); }
 bool WebSocket::sasEstablished() const { return this->_sas.isEstablished(); }
+bool WebSocket::sasConfirmed() const { return this->_sasConfirmed; }
+bool WebSocket::otherSasConfirmed() const { return this->_otherSasConfirmed; }
 
 QString WebSocket::sasEmojis() const {
     QStringList list;

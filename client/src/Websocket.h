@@ -26,6 +26,8 @@ class WebSocket : public QObject {
     Q_PROPERTY(bool sasEstablished READ sasEstablished NOTIFY sasEstablishedChanged)
     Q_PROPERTY(QString sasDecimals READ sasDecimals)
     Q_PROPERTY(QString sasEmojis READ sasEmojis)
+    Q_PROPERTY(bool sasConfirmed READ sasConfirmed NOTIFY sasConfirmedChanged)
+    Q_PROPERTY(bool otherSasConfirmed READ otherSasConfirmed NOTIFY otherSasConfirmedChanged)
     QML_ELEMENT
     QML_SINGLETON
 
@@ -39,6 +41,8 @@ class WebSocket : public QObject {
     bool _established = false;
     bool _encrypted = false;
     bool _sasEstablished = false;
+    bool _sasConfirmed = false;
+    bool _otherSasConfirmed = false;
 
     vodozemac::olm::Account _account;
     std::optional<vodozemac::olm::Session> _session = std::nullopt;
@@ -65,6 +69,8 @@ public:
 
     Q_INVOKABLE void open(const QString &url, QString publicKey);
     Q_INVOKABLE void open(const QString &url);
+    Q_INVOKABLE void confirmSas();
+    Q_INVOKABLE void declineSas();
 
     [[nodiscard]] QStringList stunServers() const;
     [[nodiscard]] QString publicKey() const;
@@ -74,12 +80,15 @@ public:
     [[nodiscard]] bool sasEstablished() const;
     [[nodiscard]] QString sasEmojis() const;
     [[nodiscard]] QString sasDecimals() const;
+    [[nodiscard]] bool sasConfirmed() const;
+    [[nodiscard]] bool otherSasConfirmed() const;
 
 signals:
     void stunServersChanged();
     void establishedChanged();
     void encryptedChanged();
-    void closed();
     void connectedChanged();
     void sasEstablishedChanged();
+    void sasConfirmedChanged();
+    void otherSasConfirmedChanged();
 };

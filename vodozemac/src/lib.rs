@@ -257,10 +257,10 @@ impl ffi::CxxOlmMessage {
         if bytes.len() < 4 {
             return Err(anyhow::anyhow!("Olm message is too small"));
         }
-        let msg_type_bytes: &[u8; 4] = bytes[0..8].try_into().map_err(anyhow::Error::from)?;
+        let msg_type_bytes: &[u8; 4] = bytes[0..4].try_into().map_err(anyhow::Error::from)?;
         let msg_type = u32::from_be_bytes(*msg_type_bytes);
 
-        OlmMessage::from_parts(msg_type as usize, &bytes[8..]).map_err(anyhow::Error::from)
+        OlmMessage::from_parts(msg_type as usize, &bytes[4..]).map_err(anyhow::Error::from)
     }
 }
 
