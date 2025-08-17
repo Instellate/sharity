@@ -1,8 +1,7 @@
 # Build
 build
 build-wasm
-cmake-debug-build
-cmake-release-build
+cmake-build-*
 fonts
 
 # Development

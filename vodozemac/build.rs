@@ -7,7 +7,7 @@ fn main() {
         .include("include");
 
     if std::env::var("TARGET") == Ok(String::from("wasm32-unknown-emscripten")) {
-        build.flag("-fexceptions").compile("libvodozemac.a");
+        build.flag("-fexceptions").flag("-sNO_DISABLE_EXCEPTION_CATCHING").compile("libvodozemac.a");
     } else {
         build.compile("libvodozemac.a");
     }

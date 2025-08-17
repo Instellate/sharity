@@ -17,7 +17,7 @@ fi
 source /opt/qt6-wasm/qtwasm_env.sh
 set -e
 
-/opt/qt6-wasm/bin/qt-cmake -B build-wasm -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+/opt/qt6-wasm/bin/qt-cmake -B build-wasm -GNinja # -DCMAKE_BUILD_TYPE=RelWithDebInfo # Rust breaks if compiled in release
 cd build-wasm
 ninja
 

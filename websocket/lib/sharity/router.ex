@@ -1,6 +1,5 @@
 defmodule Sharity.Router do
   use Plug.Router
-  require Logger
 
   plug(Plug.Logger)
   plug(:match)
@@ -63,7 +62,6 @@ defmodule Sharity.Router do
   defp handle_downloader(conn, public_key) do
     case Sharity.Downloaders.update(public_key) do
       {:ok, pid} ->
-        IO.inspect(pid)
         WebSockAdapter.upgrade(conn, Sharity.WsServer, [receiver: pid], timeout: 60_000)
         |> halt()
 
@@ -71,5 +69,9 @@ defmodule Sharity.Router do
         put_resp_content_type(conn, "application/json")
         send_resp(conn, 404, Jason.encode!(%{"message" => "Not found"}))
     end
+  end
+
+  match _ do
+    send_resp(conn, 404, "not found")
   end
 end

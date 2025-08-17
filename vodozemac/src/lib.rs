@@ -1,6 +1,8 @@
+use std::u8;
+
 use vodozemac::olm::{Account, OlmMessage, Session, SessionConfig};
 use vodozemac::sas::{EstablishedSas, Sas, SasBytes};
-use vodozemac::{Curve25519PublicKey, Ed25519PublicKey};
+use vodozemac::{Curve25519PublicKey, Ed25519PublicKey, Ed25519Signature};
 
 use crate::ffi::{CxxCurve25519PublicKey, CxxEd25519PublicKey, CxxOlmMessage, CxxSasBytes};
 
@@ -48,6 +50,8 @@ mod ffi {
         #[cxx_name = "fromBase64"]
         #[Self = "CxxEd25519PublicKey"]
         fn from_base64_ed(content: &str) -> Result<CxxEd25519PublicKey>;
+
+        fn verify(self: &CxxEd25519PublicKey, message: &[u8], signature: &[u8]) -> Result<()>;
 
         type OlmAccount;
 
@@ -147,6 +151,13 @@ impl CxxEd25519PublicKey {
     fn from_base64_ed(content: &str) -> Result<Self, vodozemac::KeyError> {
         Ed25519PublicKey::from_base64(content).map(Self::from)
     }
+
+    fn verify(&self, message: &[u8], signature: &[u8]) -> anyhow::Result<()> {
+        let key: Ed25519PublicKey = self.clone().try_into()?;
+        let sig = Ed25519Signature::from_slice(signature)?;
+
+        key.verify(message, &sig).map_err(anyhow::Error::from)
+    }
 }
 
 impl From<Ed25519PublicKey> for CxxEd25519PublicKey {
@@ -243,20 +254,20 @@ impl OlmSession {
 impl ffi::CxxOlmMessage {
     fn try_as_olm_message(&self) -> anyhow::Result<OlmMessage> {
         let bytes: &[u8] = &self.bytes;
-        if bytes.len() < 8 {
+        if bytes.len() < 4 {
             return Err(anyhow::anyhow!("Olm message is too small"));
         }
-        let msg_type_bytes: &[u8; 8] = bytes[0..8].try_into().map_err(anyhow::Error::from)?;
-        let msg_type = usize::from_be_bytes(*msg_type_bytes);
+        let msg_type_bytes: &[u8; 4] = bytes[0..8].try_into().map_err(anyhow::Error::from)?;
+        let msg_type = u32::from_be_bytes(*msg_type_bytes);
 
-        OlmMessage::from_parts(msg_type, &bytes[8..]).map_err(anyhow::Error::from)
+        OlmMessage::from_parts(msg_type as usize, &bytes[8..]).map_err(anyhow::Error::from)
     }
 }
 
 impl From<OlmMessage> for ffi::CxxOlmMessage {
     fn from(value: OlmMessage) -> Self {
         let (msg_type, mut msg) = value.to_parts();
-        let msg_type_bytes = msg_type.to_be_bytes();
+        let msg_type_bytes = (msg_type as u32).to_be_bytes();
         msg.splice(0..0, msg_type_bytes);
 
         ffi::CxxOlmMessage { bytes: msg }

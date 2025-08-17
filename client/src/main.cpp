@@ -1,14 +1,15 @@
 #include <QApplication>
 #include <QFile>
-#include <QFontDatabase>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickWindow>
 #include <QtLogging>
 #include <QtSystemDetection>
-#include <qcontainerfwd.h>
-#include <qfontdatabase.h>
-#include <qlogging.h>
+
+#ifdef Q_OS_WASM
+#include <QFontDatabase>
+#include <QStringList>
+#endif
 
 int main(int argc, char **argv) {
     QApplication app{argc, argv};
@@ -23,6 +24,8 @@ int main(int argc, char **argv) {
     }
 
 #ifdef Q_OS_WASM
+    // Loads in twemoji emojis for WASM targets
+    // Default emoji font in WASM does not have all the SAS emojis
     QFile twemoji{":/fonts/twemoji.ttf"};
     if (twemoji.exists()) {
         int fontId = QFontDatabase::addApplicationFont(":/fonts/twemoji.ttf");

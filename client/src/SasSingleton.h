@@ -7,12 +7,6 @@
 #include <qtmetamacros.h>
 #include <vodozemac.h>
 
-static QStringList emojiTable{"🐶", "🐱", "🦁", "🐎", "🦄", "🐷", "🐘", "🐰", "🐼", "🐓", "🐧", "🐢", "🐟",
-                              "🐙", "🦋", "🌷", "🌳", "🌵", "🍄", "🌏", "🌙", "☁",  "🔥", "🍌", "🍎", "🍓",
-                              "🌽", "🍕", "🎂", "❤",  "😀", "🤖", "🎩", "👓", "🔧", "🎅", "👍", "☂",  "⌛",
-                              "⏰", "🎁", "💡", "📕", "✏",  "📎", "✂",  "🔒", "🔑", "🔨", "☎",  "🏁", "🚂",
-                              "🚲", "✈",  "🚀", "🏆", "⚽", "🎸", "🎺", "🔔", "⚓", "🎧", "📁", "📌"};
-
 class SasSingleton : public QObject {
     Q_OBJECT
     QML_SINGLETON
@@ -27,36 +21,15 @@ class SasSingleton : public QObject {
 public:
     SasSingleton(QObject *parent = nullptr) : QObject(parent) {}
 
-    bool isEstablished() const { return this->_sas.isEstablished(); }
+    bool isEstablished() const;
 
-    QString publicKey() const { return QString{this->_sas.publicKey().toBase64().data()}; }
+    QString publicKey() const;
 
-    Q_INVOKABLE void diffieHellman(const QString &base64Key) {
-        QByteArray utf8 = base64Key.toUtf8();
-        const auto key = vodozemac::Curve25519PublicKey::fromBase64(utf8.data());
-        this->_sas.diffieHellman(key);
-        emit isEstablishedChanged();
-    }
+    Q_INVOKABLE void diffieHellman(const QString &base64Key);
 
-    QString decimals() {
-        QStringList list;
-        auto decimals = this->_sas.bytes("wow").decimals();
-        for (const auto decimal: decimals) {
-            list.emplace_back(QString::number(decimal));
-        }
+    QString decimals();
 
-        return list.join(", ");
-    }
-
-    QString emojis() {
-        QStringList list;
-        auto emojis = this->_sas.bytes("wow").emojiIndices();
-        for (const auto emoji: emojis) {
-            list.emplace_back(emojiTable[emoji]);
-        }
-
-        return list.join(", ");
-    }
+    QString emojis();
 
 signals:
     void isEstablishedChanged();

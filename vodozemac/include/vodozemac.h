@@ -14,11 +14,13 @@ namespace vodozemac {
 namespace vodozemac::olm {
     using OlmMessage = ffi::OlmMessage;
 
+    class Session;
+
     class Account {
         rust::Box<ffi::OlmAccount> _account = ffi::newOlmAccount();
 
     public:
-        Account() {}
+        Account() = default;
 
         Account(const Account &) = delete;
         Account(Account &&) = default;
@@ -26,18 +28,25 @@ namespace vodozemac::olm {
         Account &operator=(const Account &) = delete;
         Account &operator=(Account &&) = default;
 
-        Ed25519PublicKey ed25519Key() const;
-        Curve25519PublicKey curve25519Key() const;
+        [[nodiscard]] Ed25519PublicKey ed25519Key() const;
+        [[nodiscard]] Curve25519PublicKey curve25519Key() const;
+        [[nodiscard]] Curve25519PublicKey generateOneTimeKey();
+        [[nodiscard]] Session createOutboundSession(int32_t version,
+                                                    const Curve25519PublicKey &identityKey,
+                                                    const Curve25519PublicKey &oneTimeKey);
+        [[nodiscard]] std::tuple<Session, std::vector<uint8_t>>
+        createInboundSession(const Curve25519PublicKey &theirIdentityKey, const OlmMessage &message);
 
-        std::array<uint8_t, 64> sign(const std::vector<uint8_t> &message) const;
+        [[nodiscard]] std::array<uint8_t, 64> sign(const std::vector<uint8_t> &message) const;
     };
 
     class Session {
         rust::Box<ffi::OlmSession> _session;
+
     public:
         explicit Session(rust::Box<ffi::OlmSession> &&session) : _session(std::move(session)) {}
 
-        Session(const Account &) = delete;
+        Session(const Session &) = delete;
         Session(Session &&) = default;
 
         Session &operator=(const Session &) = delete;
@@ -65,7 +74,7 @@ namespace vodozemac::sas {
 
         bool isEstablished() const;
         Curve25519PublicKey publicKey() const;
-        void diffieHellman(Curve25519PublicKey theirPublicKey);
+        void diffieHellman(const Curve25519PublicKey &theirPublicKey);
         SasBytes bytes(const std::string &info) const;
     };
 } // namespace vodozemac::sas

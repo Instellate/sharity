@@ -6,7 +6,8 @@ defmodule Sharity.WsServer do
     if receiver !== nil do
       msg =
         Jason.encode!(%{
-          "type" => "connected"
+          "type" => "connected",
+          "stun_servers" => Application.fetch_env!(:sharity, :stun_servers)
         })
 
       send(receiver, {:connected, self()})
@@ -32,7 +33,8 @@ defmodule Sharity.WsServer do
   def handle_info({:connected, receiver}, state) do
     msg =
       Jason.encode!(%{
-        "type" => "connected"
+        "type" => "connected",
+        "stun_servers" => Application.fetch_env!(:sharity, :stun_servers)
       })
 
     Process.monitor(receiver)

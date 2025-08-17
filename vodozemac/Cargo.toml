@@ -12,8 +12,15 @@ anyhow = { version = "1.0.99", features = ["backtrace"] }
 cxx = "1.0"
 vodozemac = "0.9.0"
 
+[build-dependencies]
+cxx-build = "1.0"
+
 [target.wasm32-unknown-unknown.dependencies]
 vodozemac = { version = "0.9.0", features = ["js"] }
 
-[build-dependencies]
-cxx-build = "1.0"
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = ['-O', '--enable-bulk-memory']
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ['-O', '--enable-bulk-memory']
+
