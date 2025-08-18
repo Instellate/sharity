@@ -207,10 +207,6 @@ void WebSocket::handleUploaderResponse(rtc::binary &&binary) {
     this->_session = std::move(session);
     this->_encrypted = true;
     emit encryptedChanged();
-
-    const nlohmann::json response{{"type", "sas_token"}, {"sas_token", this->_sas.publicKey().toBase64()}};
-    const std::string responseStr = response.dump();
-    sendEncrypted(responseStr);
 }
 
 void WebSocket::handleEncryptedMessage(std::u8string &&message) {
@@ -226,44 +222,15 @@ void WebSocket::handleEncryptedMessage(std::u8string &&message) {
         qWarning() << "Got a type that either does not exist or is not a string";
     }
 
-    std::string type = json["type"];
-    if (type == "sas_token") {
-        handleSasToken(std::move(json));
-    } else if (type == "sas_confirmed") {
-        this->_otherSasConfirmed = true;
-        emit otherSasConfirmedChanged();
-    } else {
-        qWarning() << "Got unknown type" << type;
-    }
+    const QString type = QString::fromStdString(json["type"]);
+    emit this->message(type, json);
 }
 
-void WebSocket::handleSasToken(nlohmann::json &&json) {
-    if (!json.contains("sas_token") || !json["sas_token"].is_string()) {
-        qWarning() << "Got a sas token that either does not exist or is not a string";
-    }
-
-    const std::string sasToken = json["sas_token"];
-    vodozemac::Curve25519PublicKey key;
-    try {
-        key = vodozemac::Curve25519PublicKey::fromBase64(sasToken);
-    } catch (std::exception &) {
-        qWarning() << "Got invalid SAS token";
-        return;
-    }
-
-    this->_sas.diffieHellman(key);
-
-    if (!this->_publicKey.has_value()) {
-        const nlohmann::json response{{"type", "sas_token"}, {"sas_token", this->_sas.publicKey().toBase64()}};
-        const std::string responseStr = response.dump();
-        sendEncrypted(responseStr);
-    }
-
-    this->_sasEstablished = true;
-    emit sasEstablishedChanged();
-}
+static WebSocket *singletonInstance = nullptr;
 
 WebSocket::WebSocket(QObject *parent) : QObject(parent) {
+    singletonInstance = this;
+
     this->_ws.onOpen([this] {
         qInfo() << "Connected to websocket server";
         emit connectedChanged();
@@ -273,6 +240,8 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
         emit connectedChanged();
     });
 }
+
+WebSocket *WebSocket::instance() { return singletonInstance; }
 
 void WebSocket::open(const QString &url, QString publicKey) {
     const QString pubKeyCopy = publicKey;
@@ -305,9 +274,17 @@ void WebSocket::open(const QString &url) {
     this->_ws.open(fullUrl.toString().toStdString());
 }
 
+void WebSocket::send(const QString &message) {
+    if (this->_encrypted) {
+        sendEncrypted(message.toStdString());
+    } else {
+        throw std::invalid_argument{"Connection is not encrypted yet"};
+    }
+}
+
+void WebSocket::close() { this->_ws.close(); }
+
 void WebSocket::confirmSas() {
-    this->_sasConfirmed = true;
-    emit sasConfirmedChanged();
     nlohmann::json json;
     json["type"] = "sas_confirmed";
     sendEncrypted(json.dump());
@@ -326,26 +303,4 @@ QString WebSocket::publicKey() const {
 bool WebSocket::encrypted() const { return this->_encrypted; }
 bool WebSocket::established() const { return this->_established; }
 bool WebSocket::connected() const { return this->_ws.isOpen(); }
-bool WebSocket::sasEstablished() const { return this->_sas.isEstablished(); }
-bool WebSocket::sasConfirmed() const { return this->_sasConfirmed; }
-bool WebSocket::otherSasConfirmed() const { return this->_otherSasConfirmed; }
-
-QString WebSocket::sasEmojis() const {
-    QStringList list;
-    auto emojis = this->_sas.bytes("wow").emojiIndices();
-    for (const auto emoji: emojis) {
-        list.emplace_back(emojiTable[emoji]);
-    }
-
-    return list.join(", ");
-}
-
-QString WebSocket::sasDecimals() const {
-    QStringList list;
-    auto decimals = this->_sas.bytes("sassy").decimals();
-    for (const auto decimal: decimals) {
-        list.emplace_back(QString::number(decimal));
-    }
-
-    return list.join(", ");
-}
+bool WebSocket::isDownloader() const { return this->_publicKey.has_value(); }

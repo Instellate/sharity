@@ -23,11 +23,6 @@ class WebSocket : public QObject {
     Q_PROPERTY(bool established READ established NOTIFY establishedChanged)
     Q_PROPERTY(bool encrypted READ encrypted NOTIFY encryptedChanged)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
-    Q_PROPERTY(bool sasEstablished READ sasEstablished NOTIFY sasEstablishedChanged)
-    Q_PROPERTY(QString sasDecimals READ sasDecimals)
-    Q_PROPERTY(QString sasEmojis READ sasEmojis)
-    Q_PROPERTY(bool sasConfirmed READ sasConfirmed NOTIFY sasConfirmedChanged)
-    Q_PROPERTY(bool otherSasConfirmed READ otherSasConfirmed NOTIFY otherSasConfirmedChanged)
     QML_ELEMENT
     QML_SINGLETON
 
@@ -40,13 +35,9 @@ class WebSocket : public QObject {
     QStringList _stunServers;
     bool _established = false;
     bool _encrypted = false;
-    bool _sasEstablished = false;
-    bool _sasConfirmed = false;
-    bool _otherSasConfirmed = false;
 
     vodozemac::olm::Account _account;
     std::optional<vodozemac::olm::Session> _session = std::nullopt;
-    vodozemac::sas::Sas _sas;
 
     void sendEncrypted(const std::string &message);
 
@@ -62,13 +53,17 @@ class WebSocket : public QObject {
 
     void handleEncryptedMessage(std::u8string &&message);
 
-    void handleSasToken(nlohmann::json &&json);
-
 public:
     explicit WebSocket(QObject *parent = nullptr);
 
+    static WebSocket *instance();
+
     Q_INVOKABLE void open(const QString &url, QString publicKey);
     Q_INVOKABLE void open(const QString &url);
+
+    Q_INVOKABLE void send(const QString &message);
+    Q_INVOKABLE void close();
+
     Q_INVOKABLE void confirmSas();
     Q_INVOKABLE void declineSas();
 
@@ -77,18 +72,13 @@ public:
     [[nodiscard]] bool encrypted() const;
     [[nodiscard]] bool established() const;
     [[nodiscard]] bool connected() const;
-    [[nodiscard]] bool sasEstablished() const;
-    [[nodiscard]] QString sasEmojis() const;
-    [[nodiscard]] QString sasDecimals() const;
-    [[nodiscard]] bool sasConfirmed() const;
-    [[nodiscard]] bool otherSasConfirmed() const;
+    [[nodiscard]] bool isDownloader() const;
 
 signals:
     void stunServersChanged();
     void establishedChanged();
     void encryptedChanged();
     void connectedChanged();
-    void sasEstablishedChanged();
-    void sasConfirmedChanged();
-    void otherSasConfirmedChanged();
+
+    void message(const QString &type, const nlohmann::json &json);
 };

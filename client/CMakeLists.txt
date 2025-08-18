@@ -3,7 +3,7 @@ project(sharity-client)
 
 include(FetchContent)
 
-if(EMSCRIPTEN)
+if (EMSCRIPTEN)
   message(STATUS "Configuring for WASM target")
 
   FetchContent_Declare(
@@ -20,12 +20,12 @@ if(EMSCRIPTEN)
 
   set(Rust_CARGO_TARGET wasm32-unknown-emscripten)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -sNO_DISABLE_EXCEPTION_CATCHING")
-else()
+else ()
   find_package(LibDataChannel CONFIG REQUIRED)
   find_package(nlohmann_json REQUIRED)
 
   set(LIBDATACHANNEL LibDataChannel::LibDataChannel)
-endif()
+endif ()
 
 FetchContent_Declare(
   Corrosion
@@ -45,17 +45,18 @@ corrosion_import_crate(MANIFEST_PATH
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Quick Qml)
 qt_standard_project_setup()
 
-if(QT_KNOWN_POLICY_QTP0004)
+if (QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
-endif()
+endif ()
 
-if(EMSCRIPTEN)
+if (EMSCRIPTEN)
   message(STATUS "Adding twemoji resources")
   qt_add_resources(SHARITY_RESOURCES resources.qrc)
-endif()
+endif ()
 
-qt_add_executable(sharity-client src/main.cpp src/SasSingleton.cpp
-                  src/WebSocket.cpp src/Websocket.h ${SHARITY_RESOURCES})
+qt_add_executable(sharity-client src/main.cpp src/WebSocket.cpp src/Websocket.h ${SHARITY_RESOURCES}
+        src/SasVerification.cpp
+        src/SasVerification.h)
 target_link_libraries(
   sharity-client
   PRIVATE Qt6::Core
@@ -72,15 +73,15 @@ target_include_directories(sharity-client
                            PUBLIC ${CMAKE_SOURCE_DIR}/../vodozemac/include)
 
 file(GLOB_RECURSE QML_FILES ${PROJECT_SOURCE_DIR}/qml/*.qml)
-foreach(QML_FILE IN LISTS QML_FILES)
+foreach (QML_FILE IN LISTS QML_FILES)
   file(RELATIVE_PATH REL "${PROJECT_SOURCE_DIR}" "${QML_FILE}")
   string(REPLACE "qml/" "./" TRANSFORMED_PATH "${REL}")
   message(STATUS "Registering QML file: ${QML_FILE}")
   set_source_files_properties(${QML_FILE} PROPERTIES QT_RESOURCE_ALIAS
                                                      "${TRANSFORMED_PATH}")
-endforeach()
+endforeach ()
 
-set(QML_SINGLETONS src/SasSingleton.h src/WebSocket.h)
+set(QML_SINGLETONS src/WebSocket.h)
 set_source_files_properties(${QML_SINGLETONS} PROPERTIES
                                               QT_QML_SINGLETON_TYPE true)
 
@@ -90,12 +91,12 @@ qt_add_qml_module(sharity-client
   OUTPUT_DIRECTORY qmlGen
   RESOURCE_PREFIX /qt/qml
   QML_FILES ${QML_FILES}
-  SOURCES src/SasSingleton.h src/Websocket.h)
+  SOURCES src/Websocket.h src/SasVerification.h)
 
-if((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
+if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
   target_compile_options(sharity-client PUBLIC "/Zc:__cplusplus")
   target_compile_options(sharity-client PRIVATE /W4 /WX)
-else()
+else ()
   target_compile_options(sharity-client PRIVATE -Wall -Wextra -Werror
                                                 -Wno-language-extension-token)
-endif()
+endif ()

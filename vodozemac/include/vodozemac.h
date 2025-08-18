@@ -9,6 +9,10 @@
 namespace vodozemac {
     using Ed25519PublicKey = ffi::Ed25519PublicKey;
     using Curve25519PublicKey = ffi::Curve25519PublicKey;
+
+    inline std::string rustToStdString(rust::String &&string) {
+        return {string.begin(), string.end()};
+    }
 } // namespace vodozemac
 
 namespace vodozemac::olm {
