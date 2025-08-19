@@ -14,15 +14,10 @@ if (EMSCRIPTEN)
 
   set(LIBDATACHANNEL datachannel-wasm)
 
-  FetchContent_Declare(json 
-    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
-  FetchContent_MakeAvailable(json)
-
   set(Rust_CARGO_TARGET wasm32-unknown-emscripten)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -sNO_DISABLE_EXCEPTION_CATCHING")
 else ()
   find_package(LibDataChannel CONFIG REQUIRED)
-  find_package(nlohmann_json REQUIRED)
 
   set(LIBDATACHANNEL LibDataChannel::LibDataChannel)
 endif ()
@@ -65,8 +60,7 @@ target_link_libraries(
           Qt6::Quick
           Qt6::Qml
           vodozemac
-          ${LIBDATACHANNEL}
-          nlohmann_json::nlohmann_json)
+          ${LIBDATACHANNEL})
 
 target_include_directories(sharity-client PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(sharity-client

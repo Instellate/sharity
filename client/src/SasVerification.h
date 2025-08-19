@@ -1,7 +1,7 @@
 #pragma once
 
+#include <QJsonObject>
 #include <QObject>
-#include <nlohmann/json.hpp>
 #include <qqmlintegration.h>
 
 #include "vodozemac.h"
@@ -38,5 +38,5 @@ signals:
     void otherSasConfirmedChanged();
 
 private slots:
-    void wsMessage(const QString &type, const nlohmann::json &json);
+    void wsMessage(const QString &type, const QJsonObject &json);
 };

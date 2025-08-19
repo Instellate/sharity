@@ -1,23 +1,15 @@
 #include "Websocket.h"
 
-#include <QDebug>
+#include <QJsonObject>
 #include <QMutexLocker>
 #include <QUrlQuery>
+#include <QtLogging>
 #include <exception>
-#include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
-#include <qlogging.h>
 #include <string>
 #include <variant>
 
-static QStringList emojiTable{"🐶", "🐱", "🦁", "🐎", "🦄", "🐷", "🐘", "🐰", "🐼", "🐓", "🐧", "🐢", "🐟",
-                              "🐙", "🦋", "🌷", "🌳", "🌵", "🍄", "🌏", "🌙", "☁",  "🔥", "🍌", "🍎", "🍓",
-                              "🌽", "🍕", "🎂", "❤",  "😀", "🤖", "🎩", "👓", "🔧", "🎅", "👍", "☂",  "⌛",
-                              "⏰", "🎁", "💡", "📕", "✏",  "📎", "✂",  "🔒", "🔑", "🔨", "☎",  "🏁", "🚂",
-                              "🚲", "✈",  "🚀", "🏆", "⚽", "🎸", "🎺", "🔔", "⚓", "🎧", "📁", "📌"};
-
-void WebSocket::sendEncrypted(const std::string &message) {
-    auto bytes = this->_session->encrypt(message).bytes;
+void WebSocket::sendEncrypted(const QString &message) {
+    auto bytes = this->_session->encrypt(message.toStdString()).bytes;
     auto bytesPtr = reinterpret_cast<std::byte *>(bytes.data());
 
     rtc::binary binary{bytesPtr, bytesPtr + bytes.size()};
@@ -68,45 +60,44 @@ void WebSocket::onMessage(std::variant<rtc::binary, rtc::string> &&message) {
 }
 
 void WebSocket::handleConnected(rtc::string &&message) {
-    try {
-        const auto json = nlohmann::json::parse(message);
-        if (!json.contains("type") || !json["type"].is_string()) {
-            qWarning() << "Got a json object from unestablished channel that does not contain property "
-                          "\"type\"";
-            return;
-        }
-
-        const std::string type = json["type"];
-        if (type != "connected") {
-            qWarning() << "Got unknown type from websocket:" << type;
-            return;
-        }
-
-        const std::vector<std::string> stunServers = json["stun_servers"];
-        QStringList qtStunServers;
-        for (const auto &server: stunServers) {
-            qtStunServers.emplace_back(QString::fromStdString(server));
-        }
-        this->_stunServers = std::move(qtStunServers);
-        emit stunServersChanged();
-        if (this->_publicKey.has_value()) {
-            handleInitialEstablishment();
-        }
-        this->_established = true;
-        emit establishedChanged();
-    } catch (const std::exception &e) {
-        qWarning() << "Got error when trying to read json:" << e.what();
+    const auto jsonDoc = QJsonDocument::fromJson(QByteArray{message.data(), static_cast<qsizetype>(message.size())});
+    if (jsonDoc.isNull()) {
+        qWarning() << "Got invalid JSON";
+        return;
     }
+    const QJsonObject json = jsonDoc.object();
+
+    if (!json.contains("type") || !json["type"].isString()) {
+        qWarning() << "Got a json object from unestablished channel that does not contain property "
+                      "\"type\"";
+        return;
+    }
+
+    const QString type = json["type"].toString();
+    if (type != "connected") {
+        qWarning() << "Got unknown type from websocket:" << type;
+        return;
+    }
+
+    const QStringList stunServers = json["stun_servers"].toVariant().toStringList();
+    this->_stunServers = stunServers;
+    emit stunServersChanged();
+    if (this->_publicKey.has_value()) {
+        handleInitialEstablishment();
+    }
+    this->_established = true;
+    emit establishedChanged();
 }
 
 void WebSocket::handleInitialEstablishment() {
     std::vector<uint8_t> buffer;
 
     vodozemac::Curve25519PublicKey identityKey = this->_account.curve25519Key();
-    buffer.insert(buffer.end(), identityKey.bytes.begin(), identityKey.bytes.end());
+    vodozemac::Curve25519PublicKey oneTimeKey = this->_account.generateOneTimeKey();
+    buffer.reserve(identityKey.bytes.size() + oneTimeKey.bytes.size());
 
-    vodozemac::Curve25519PublicKey otk = this->_account.generateOneTimeKey();
-    buffer.insert(buffer.end(), otk.bytes.begin(), otk.bytes.end());
+    buffer.insert(buffer.end(), identityKey.bytes.begin(), identityKey.bytes.end());
+    buffer.insert(buffer.end(), oneTimeKey.bytes.begin(), oneTimeKey.bytes.end());
 
     // No idea how send handles provided data, but I do not want segfaults
     auto *bufferPtr = reinterpret_cast<std::byte *>(buffer.data());
@@ -210,19 +201,19 @@ void WebSocket::handleUploaderResponse(rtc::binary &&binary) {
 }
 
 void WebSocket::handleEncryptedMessage(std::u8string &&message) {
-    nlohmann::json json;
-    try {
-        json = nlohmann::json::parse(message);
-    } catch (std::exception &) {
+    const QByteArray byteArray{reinterpret_cast<const char *>(message.data()), static_cast<qsizetype>(message.size())};
+    const auto jsonDoc = QJsonDocument::fromJson(byteArray);
+    if (jsonDoc.isNull()) {
         qWarning() << "Got invalid json from encrypted message";
         return;
     }
 
-    if (!json.contains("type") || !json["type"].is_string()) {
+    QJsonObject json = jsonDoc.object();
+    if (!json.contains("type") || !json["type"].isString()) {
         qWarning() << "Got a type that either does not exist or is not a string";
     }
 
-    const QString type = QString::fromStdString(json["type"]);
+    const QString type = json["type"].toString();
     emit this->message(type, json);
 }
 
@@ -276,7 +267,7 @@ void WebSocket::open(const QString &url) {
 
 void WebSocket::send(const QString &message) {
     if (this->_encrypted) {
-        sendEncrypted(message.toStdString());
+        sendEncrypted(message);
     } else {
         throw std::invalid_argument{"Connection is not encrypted yet"};
     }
@@ -285,9 +276,9 @@ void WebSocket::send(const QString &message) {
 void WebSocket::close() { this->_ws.close(); }
 
 void WebSocket::confirmSas() {
-    nlohmann::json json;
+    QJsonObject json;
     json["type"] = "sas_confirmed";
-    sendEncrypted(json.dump());
+    sendEncrypted(QJsonDocument{json}.toJson());
 }
 
 void WebSocket::declineSas() { this->_ws.close(); }

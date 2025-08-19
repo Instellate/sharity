@@ -1,8 +1,7 @@
 #include "SasVerification.h"
 
-#include <QDebug>
-#include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonDocument>
 #include "Websocket.h"
 
 static QStringList emojiTable{"🐶", "🐱", "🦁", "🐎", "🦄", "🐷", "🐘", "🐰", "🐼", "🐓", "🐧", "🐢", "🐟",
@@ -17,9 +16,9 @@ SasVerification::SasVerification(QObject *parent) : QObject(parent) {
     connect(ws, &WebSocket::message, this, &SasVerification::wsMessage, Qt::QueuedConnection);
 
     if (ws->isDownloader()) {
-        std::string sasToken = vodozemac::rustToStdString(this->_sas.publicKey().toBase64());
-        const QJsonObject json{{"type", "sas_token"}, {"sas_token", QString::fromStdString(std::move(sasToken))}};
-        const QJsonDocument doc{std::move(json)};
+        const std::string sasToken = vodozemac::rustToStdString(this->_sas.publicKey().toBase64());
+        const QJsonObject json{{"type", "sas_token"}, {"sas_token", QString::fromStdString(sasToken)}};
+        const QJsonDocument doc{json};
         ws->send(doc.toJson(QJsonDocument::Compact));
     }
 }
@@ -48,26 +47,32 @@ QString SasVerification::decimals() const {
     return list.join(", ");
 }
 
-void SasVerification::confirmSas() { this->_sasConfirmed = true; }
+void SasVerification::confirmSas() {
+    this->_sasConfirmed = true;
+    emit sasConfirmedChanged();
+
+    QJsonObject json{{"type", "sas_confirmed"}};
+    WebSocket::instance()->send(QJsonDocument{std::move(json)}.toJson());
+}
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void SasVerification::declineSas() { WebSocket::instance()->close(); }
+void SasVerification::declineSas() { WebSocket::instance()->close(); } // NOLINT
 
-void SasVerification::wsMessage(const QString &type, const nlohmann::json &json) {
+void SasVerification::wsMessage(const QString &type, const QJsonObject &json) {
     if (type == "sas_token") {
         if (this->_sas.isEstablished()) {
             qWarning() << "Got duplicate sas_token when it already is established";
             return;
         }
 
-        if (!json.contains("sas_token") || !json["sas_token"].is_string()) {
+        if (!json.contains("sas_token") || !json["sas_token"].isString()) {
             qWarning() << "Got invalid sas token";
             return;
         }
 
-        const std::string sasToken = json["sas_token"];
+        const QString sasToken = json["sas_token"].toString();
         try {
-            const auto key = vodozemac::Curve25519PublicKey::fromBase64(sasToken);
+            const auto key = vodozemac::Curve25519PublicKey::fromBase64(sasToken.toStdString());
             this->_sas.diffieHellman(key);
             emit sasEstablishedChanged();
         } catch (std::exception &e) {
@@ -75,10 +80,9 @@ void SasVerification::wsMessage(const QString &type, const nlohmann::json &json)
         }
 
         if (!WebSocket::instance()->isDownloader()) {
-            std::string mySasToken = vodozemac::rustToStdString(this->_sas.publicKey().toBase64());
-            const QJsonObject response{{"type", "sas_token"},
-                                       {"sas_token", QString::fromStdString(std::move(mySasToken))}};
-            const QJsonDocument doc{std::move(response)};
+            const std::string mySasToken = vodozemac::rustToStdString(this->_sas.publicKey().toBase64());
+            const QJsonObject response{{"type", "sas_token"}, {"sas_token", QString::fromStdString(mySasToken)}};
+            const QJsonDocument doc{response};
             WebSocket::instance()->send(doc.toJson(QJsonDocument::Compact));
         }
     } else if (type == "sas_confirmed") {

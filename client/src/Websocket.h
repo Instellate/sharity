@@ -1,19 +1,15 @@
 #pragma once
 
-#include <qatomic.h>
-#include <qobject.h>
 #include <qtmetamacros.h>
 #include <rtc/common.hpp>
 #include <rtc/websocket.hpp>
 #include <variant>
 #include <vodozemac.h>
 
-#include <QMutex>
 #include <QObject>
+#include <QMutex>
 #include <QString>
 #include <QStringList>
-#include <QUrl>
-#include <nlohmann/adl_serializer.hpp>
 #include <qqmlintegration.h>
 
 class WebSocket : public QObject {
@@ -39,7 +35,7 @@ class WebSocket : public QObject {
     vodozemac::olm::Account _account;
     std::optional<vodozemac::olm::Session> _session = std::nullopt;
 
-    void sendEncrypted(const std::string &message);
+    void sendEncrypted(const QString &message);
 
     void onMessage(std::variant<rtc::binary, rtc::string> &&message);
 
@@ -80,5 +76,5 @@ signals:
     void encryptedChanged();
     void connectedChanged();
 
-    void message(const QString &type, const nlohmann::json &json);
+    void message(const QString &type, const QJsonObject &json);
 };
