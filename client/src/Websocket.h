@@ -6,8 +6,8 @@
 #include <variant>
 #include <vodozemac.h>
 
-#include <QObject>
 #include <QMutex>
+#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <qqmlintegration.h>
@@ -19,6 +19,7 @@ class WebSocket : public QObject {
     Q_PROPERTY(bool established READ established NOTIFY establishedChanged)
     Q_PROPERTY(bool encrypted READ encrypted NOTIFY encryptedChanged)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
+    Q_PROPERTY(bool isDownloader READ isDownloader)
     QML_ELEMENT
     QML_SINGLETON
 
@@ -59,9 +60,6 @@ public:
 
     Q_INVOKABLE void send(const QString &message);
     Q_INVOKABLE void close();
-
-    Q_INVOKABLE void confirmSas();
-    Q_INVOKABLE void declineSas();
 
     [[nodiscard]] QStringList stunServers() const;
     [[nodiscard]] QString publicKey() const;

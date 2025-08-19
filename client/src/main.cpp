@@ -11,6 +11,8 @@
 #include <QStringList>
 #endif
 
+#include <rtc/rtc.hpp>
+
 int main(int argc, char **argv) {
     QApplication app{argc, argv};
 

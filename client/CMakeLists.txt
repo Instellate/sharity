@@ -51,7 +51,11 @@ endif ()
 
 qt_add_executable(sharity-client src/main.cpp src/WebSocket.cpp src/Websocket.h ${SHARITY_RESOURCES}
         src/SasVerification.cpp
-        src/SasVerification.h)
+        src/SasVerification.h
+        src/DownloaderPeer.cpp
+        src/DownloaderPeer.h
+        src/UploaderPeer.cpp
+        src/UploaderPeer.h)
 target_link_libraries(
   sharity-client
   PRIVATE Qt6::Core
@@ -85,7 +89,7 @@ qt_add_qml_module(sharity-client
   OUTPUT_DIRECTORY qmlGen
   RESOURCE_PREFIX /qt/qml
   QML_FILES ${QML_FILES}
-  SOURCES src/Websocket.h src/SasVerification.h)
+  SOURCES src/Websocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h)
 
 if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
   target_compile_options(sharity-client PUBLIC "/Zc:__cplusplus")

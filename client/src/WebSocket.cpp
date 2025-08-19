@@ -5,6 +5,7 @@
 #include <QUrlQuery>
 #include <QtLogging>
 #include <exception>
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -228,6 +229,10 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
     });
     this->_ws.onClosed([this] {
         qInfo() << "Websocket connection closed";
+        this->_encrypted = false;
+        this->_established = false;
+        this->_publicKey = std::nullopt;
+        this->_session = std::nullopt;
         emit connectedChanged();
     });
 }
@@ -274,14 +279,6 @@ void WebSocket::send(const QString &message) {
 }
 
 void WebSocket::close() { this->_ws.close(); }
-
-void WebSocket::confirmSas() {
-    QJsonObject json;
-    json["type"] = "sas_confirmed";
-    sendEncrypted(QJsonDocument{json}.toJson());
-}
-
-void WebSocket::declineSas() { this->_ws.close(); }
 
 QStringList WebSocket::stunServers() const { return this->_stunServers; }
 

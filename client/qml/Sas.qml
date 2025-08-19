@@ -9,7 +9,8 @@ ColumnLayout {
     spacing: 4
 
     property bool displayEmojis: true
-    property bool displaySas: sas.sasEstablished
+    property bool displaySas: sas.sasEstablished && !sas.sasConfirmed
+    property bool sasConfirmed: sas.sasConfirmed && sas.otherSasConfirmed;
 
     SasVerification {
         id: sas
@@ -60,6 +61,7 @@ ColumnLayout {
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
         visible: root.displaySas
+        enabled: !sas.sasConfirmed
 
         Button {
             text: "Yes"
