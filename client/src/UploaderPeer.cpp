@@ -4,7 +4,13 @@
 #include <QJsonObject>
 #include "Websocket.h"
 
-UploaderPeer::UploaderPeer() {
+QUrl UploaderPeer::selectedFile() const { return this->_selectedFile; }
+void UploaderPeer::setSelectedFile(QUrl url) { 
+    this->_selectedFile = url; 
+    emit selectedFileChanged();
+}
+
+void UploaderPeer::startFileNegotiation() {
     rtc::Configuration config;
     const auto stunServers = WebSocket::instance()->stunServers();
     for (const QString &server: stunServers) {
@@ -24,20 +30,25 @@ UploaderPeer::UploaderPeer() {
     });
 
     connect(WebSocket::instance(), &WebSocket::message, this, &UploaderPeer::wsMessage);
-    this->_channel = this->_peer->createDataChannel("test");
-    this->_channel->onOpen([this] {
+
+    // A channel needs to be created for establishment to be made with libdatachannel
+    // TODO: Have the first datachannel be a file stream
+    DataChannel channel = this->_peer->createDataChannel("establish");
+    channel->onOpen([channel] {
         qInfo() << "Data channel open";
-        this->_channel->send("Hello!");
+        channel->send("Hello!");
     });
-    this->_channel->onClosed([] { qInfo() << "Data channel closed"; });
+    channel->onClosed([channel] { qInfo() << "Data channel" << channel->label() << "has been closed"; });
+    this->_channels.emplace_back(std::move(channel));
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void UploaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
     if (type == "rtc_answer") {
         const rtc::Description answer = json["answer"].toString().toStdString();
         this->_peer->setRemoteDescription(answer);
     } else if (type == "rtc_candidate") {
-        rtc::Candidate candidate = json["candidate"].toString().toStdString();
+        const rtc::Candidate candidate = json["candidate"].toString().toStdString();
         this->_peer->addRemoteCandidate(candidate);
     }
 }

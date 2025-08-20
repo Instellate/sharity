@@ -26,7 +26,8 @@ Window {
 
         onLoaded: {
             if (item instanceof Sas) {
-                root.sasConfirmed = Qt.binding(() => item.sasConfirmed);
+                // Causes bind loop. Maybe do it another way
+                root.sasConfirmed = Qt.binding(() => item.sasConfirmed); 
             }
         }
     }

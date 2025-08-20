@@ -1,22 +1,31 @@
 #pragma once
 
 #include <QFile>
-#include <QObject>
 #include <QJsonObject>
+#include <QObject>
 #include <qqmlintegration.h>
 #include <rtc/rtc.hpp>
 
 class UploaderPeer : public QObject {
     Q_OBJECT
+    Q_PROPERTY(QUrl selectedFile READ selectedFile WRITE setSelectedFile NOTIFY selectedFileChanged)
     QML_ELEMENT
 
-    QFile _uploadingFile;
-    std::shared_ptr<rtc::PeerConnection> _peer;
-    std::shared_ptr<rtc::DataChannel> _channel = nullptr;
+    using DataChannel = std::shared_ptr<rtc::DataChannel>;
+
+    QUrl _selectedFile;
+    std::shared_ptr<rtc::PeerConnection> _peer = nullptr;
+    std::vector<DataChannel> _channels{};
 
 public:
-    UploaderPeer();
+    [[nodiscard]] QUrl selectedFile() const;
+    void setSelectedFile(QUrl url);
 
-    private slots:
+    Q_INVOKABLE void startFileNegotiation();
+
+signals:
+    void selectedFileChanged();
+
+private slots:
     void wsMessage(const QString &type, const QJsonObject &json);
 };

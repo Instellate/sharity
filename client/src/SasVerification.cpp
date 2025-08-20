@@ -52,7 +52,7 @@ void SasVerification::confirmSas() {
     emit sasConfirmedChanged();
 
     QJsonObject json{{"type", "sas_confirmed"}};
-    WebSocket::instance()->send(QJsonDocument{std::move(json)}.toJson());
+    WebSocket::instance()->send(QJsonDocument{json}.toJson());
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic

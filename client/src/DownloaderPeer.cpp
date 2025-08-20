@@ -29,6 +29,7 @@ DownloaderPeer::DownloaderPeer() {
         const QJsonObject response{{"type", "rtc_answer"}, {"answer", QString::fromStdString(sdp)}};
         WebSocket::instance()->send(QJsonDocument{response}.toJson());
     });
+
     this->_peer->onLocalCandidate([](const rtc::Candidate &candidate) {
         qInfo() << "Got candidate" << std::string{candidate};
         const QJsonObject json{{"type", "rtc_candidate"}, {"candidate", QString::fromStdString(candidate)}};
