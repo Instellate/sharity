@@ -18,9 +18,8 @@ void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
 
     channel->onClosed([this, channel] { std::erase(this->_channels, channel); });
     channel->onMessage([file](const std::variant<rtc::binary, rtc::string> &message) {
-        qDebug() << "Received WebRTC message";
         if (std::holds_alternative<rtc::string>(message)) {
-            qWarning() << "Got string from datachannel when expected binary";
+            qWarning() << "Got string from datachannel when expected binary. Ignoring this message";
             return;
         }
 
