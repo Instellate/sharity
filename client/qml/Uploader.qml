@@ -43,7 +43,7 @@ ColumnLayout {
         text: "Upload file"
         onClicked: {
             root.isUploading = true;
-            // peer.startFileNegotiation();
+            peer.startFileNegotiation();
         }
     }
 

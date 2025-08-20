@@ -37,7 +37,7 @@ set(CMAKE_AUTOUIC ON)
 
 corrosion_import_crate(MANIFEST_PATH
                        ${CMAKE_SOURCE_DIR}/../vodozemac/Cargo.toml)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Quick Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml)
 qt_standard_project_setup()
 
 if (QT_KNOWN_POLICY_QTP0004)
@@ -59,6 +59,7 @@ qt_add_executable(sharity-client src/main.cpp src/WebSocket.cpp src/Websocket.h 
 target_link_libraries(
   sharity-client
   PRIVATE Qt6::Core
+          Qt6::Concurrent
           Qt6::Gui
           Qt6::Widgets
           Qt6::Quick

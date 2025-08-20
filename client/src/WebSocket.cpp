@@ -215,6 +215,7 @@ void WebSocket::handleEncryptedMessage(std::u8string &&message) {
     }
 
     const QString type = json["type"].toString();
+    qDebug() << "Got websocket message with type:" << type;
     emit this->message(type, json);
 }
 

@@ -12,4 +12,6 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         text: "Waiting on uploader..."
     }
+
+    DownloaderPeer {}
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QFile>
+#include <QFuture>
 #include <QJsonObject>
 #include <QObject>
 #include <qqmlintegration.h>
@@ -15,16 +16,25 @@ class UploaderPeer : public QObject {
 
     QUrl _selectedFile;
     std::shared_ptr<rtc::PeerConnection> _peer = nullptr;
-    std::vector<DataChannel> _channels{};
+
+    QFuture<void> _streamFuture;
+
+    void startRtcNegotiation();
+    void handleFileUpload(const DataChannel &channel);
 
 public:
-    [[nodiscard]] QUrl selectedFile() const;
-    void setSelectedFile(QUrl url);
+    explicit UploaderPeer(QObject *parent = nullptr);
 
-    Q_INVOKABLE void startFileNegotiation();
+    ~UploaderPeer() override;
+
+    [[nodiscard]] QUrl selectedFile() const;
+    void setSelectedFile(const QUrl &url);
+
+    Q_INVOKABLE void startFileNegotiation() const;
 
 signals:
     void selectedFileChanged();
+    void fileUploaded();
 
 private slots:
     void wsMessage(const QString &type, const QJsonObject &json);
