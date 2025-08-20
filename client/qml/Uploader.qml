@@ -38,7 +38,7 @@ ColumnLayout {
 
     Button {
         Layout.alignment: Qt.AlignHCenter
-        enabled: !root.isUploading
+        enabled: fileDialog.selectedFiles.length > 0 && !root.isUploading
 
         text: "Upload file"
         onClicked: {

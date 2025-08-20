@@ -35,25 +35,36 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     QFile file{localFile};
     file.open(QIODeviceBase::ReadOnly);
 
-    const qint64 bufferSize = channel->maxMessageSize();
-    auto buffer = new char[channel->maxMessageSize()];
+    constexpr size_t minimumBufferSize = 1024 * 1024 * 5;
+    auto promise = std::make_shared<std::promise<void>>();
+    channel->setBufferedAmountLowThreshold(minimumBufferSize);
+    channel->onBufferedAmountLow([promise] {
+        promise->set_value();
+    });
+
+    const auto bufferSize = static_cast<qint64>(channel->maxMessageSize());
+    const auto buffer = new char[channel->maxMessageSize()];
 
     bool failed = false;
     try {
         while (!file.atEnd() && !this->_streamFuture.isCanceled()) {
             const qint64 dataRead = file.read(buffer, bufferSize);
             channel->send(reinterpret_cast<std::byte *>(buffer), dataRead);
+            if (channel->bufferedAmount() > minimumBufferSize * 2) {
+                promise->get_future().wait();
+                *promise = std::promise<void>{};
+            }
         }
     } catch (std::exception &e) {
         qWarning() << "Got error" << e.what() << "when trying to upload file";
-        QJsonDocument json{{"type", "stream_error"}};
+        const QJsonDocument json{{"type", "stream_error"}};
         WebSocket::instance()->send(QJsonDocument{json}.toJson());
         failed = true;
     }
 
     if (!failed) {
         emit fileUploaded();
-        QJsonObject json{{"type", "stream_completed"}, {"label", QString::fromStdString(channel->label())}};
+        const QJsonObject json{{"type", "stream_completed"}, {"label", QString::fromStdString(channel->label())}};
         WebSocket::instance()->send(QJsonDocument{json}.toJson());
     }
 
