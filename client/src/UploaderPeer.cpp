@@ -24,6 +24,7 @@ void UploaderPeer::startRtcNegotiation() {
 
     DataChannel channel = this->_peer->createDataChannel(this->_selectedFile.fileName().toStdString());
     channel->onOpen([this, channel] {
+        qDebug() << "Data channel" << channel->label() << "for uploading was opened";
         this->_streamFuture = QtConcurrent::run(&UploaderPeer::handleFileUpload, this, channel);
     });
     channel->onClosed([channel] { qDebug() << "Data channel" << channel->label() << "has been closed"; });
@@ -69,6 +70,7 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     }
 
     delete[] buffer;
+    channel->close();
 }
 
 UploaderPeer::UploaderPeer(QObject *parent) : QObject(parent) {
