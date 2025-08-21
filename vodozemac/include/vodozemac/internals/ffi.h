@@ -1,1 +1,0 @@
-../../../target/cxxbridge/vodozemac-cpp/src/lib.rs.h
