@@ -21,7 +21,7 @@ jobs:
         id: cache-libdatachannel
         uses: actions/cache@v4
         with:
-          path: libdatachannel
+          path: 'C:/Program Files (x86)/libdatachannel'
           key: ${{ runner.os }}-libdatachannel
 
       - name: Build LibDataChannel
