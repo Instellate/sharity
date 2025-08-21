@@ -7,7 +7,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .file("src/lib.cpp")
         .cpp(true)
         .std("c++20")
-        .static_flag(true)
         .include("include");
 
     let ffi_header = Path::new("target/cxxbridge/vodozemac-cpp/src/lib.rs.h");

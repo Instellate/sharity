@@ -37,6 +37,10 @@ set(CMAKE_AUTOUIC ON)
 
 corrosion_import_crate(MANIFEST_PATH
                        ${CMAKE_SOURCE_DIR}/../vodozemac/Cargo.toml)
+if(MSVC)
+  corrosion_set_env_vars(vodozemac "CFLAGS=-MDd" "CXXFLAGS=-MDd")
+endif()
+			   
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml)
 qt_standard_project_setup()
 
@@ -66,6 +70,10 @@ target_link_libraries(
           Qt6::Qml
           vodozemac
           ${LIBDATACHANNEL})
+
+if (MSVC)
+ target_link_libraries(sharity-client PRIVATE bcrypt)
+endif ()
 
 target_include_directories(sharity-client PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(sharity-client
