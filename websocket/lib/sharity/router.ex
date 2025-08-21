@@ -1,6 +1,5 @@
 defmodule Sharity.Router do
   use Plug.Router
-  require Logger
 
   plug(Plug.Logger)
   plug(:match)
@@ -49,7 +48,6 @@ defmodule Sharity.Router do
 
   @spec handle_uploader(Plug.Conn.t(), binary()) :: term()
   defp handle_uploader(conn, public_key) do
-    IO.inspect(conn.query_params)
     with %{"signature" => signature, "message" => message} <- conn.query_params,
          {:ok, signature} <- Base.url_decode64(signature, padding: false),
          :ok <- Cafezinho.verify(signature, message, public_key),
