@@ -5,11 +5,12 @@ on:
 
 jobs:
   build-nsis:
+    name: Build and Package NSIS
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install QT
+      - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.9.1'
@@ -26,13 +27,16 @@ jobs:
           cmake --build build --config Release
           cmake --install build
 
+      - uses: dtolnay/rust-toolchain@stable
+        name: Setup Rust
+
       - name: Build Sharity
         run: |
-          cd "${GITHUB_WORKSPACE}"
+          cd "${GITHUB_WORKSPACE}/sharity"
           cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
       - name: Pacakge NSIS
         run: |
-          cd "${GITHUB_WORKSPACE}/build"
+          cd "${GITHUB_WORKSPACE}/sharity/build"
           cpack .
