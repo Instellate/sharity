@@ -17,8 +17,8 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2022_64'
 
-      - name: Upgrade CMake
-        run: winget upgrade Kitware.CMake --disable-interactivity --accept-source-agreements --accept-package-agreements
+      - name: Install CMake
+        uses: ssrobins/install-cmake@v1
 
       - name: Cache LibDataChannel
         id: cache-libdatachannel
