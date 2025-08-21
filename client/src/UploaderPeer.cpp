@@ -39,9 +39,7 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     constexpr size_t minimumBufferSize = 1024 * 1024 * 5;
     auto promise = std::make_shared<std::promise<void>>();
     channel->setBufferedAmountLowThreshold(minimumBufferSize);
-    channel->onBufferedAmountLow([promise] {
-        promise->set_value();
-    });
+    channel->onBufferedAmountLow([promise] { promise->set_value(); });
 
     const auto bufferSize = static_cast<qint64>(channel->maxMessageSize());
     const auto buffer = new char[channel->maxMessageSize()];
@@ -90,11 +88,10 @@ void UploaderPeer::setSelectedFile(const QUrl &url) {
 }
 
 void UploaderPeer::startFileNegotiation() const {
+    QFile file{this->_selectedFile.toLocalFile()};
+
     qDebug() << "Starting file negotiation for file" << this->_selectedFile.fileName();
-    const QJsonObject json{
-            {"type", "stream_request"},
-            {"stream_type", "upload"},
-    };
+    const QJsonObject json{{"type", "stream_request"}, {"stream_type", "upload"}, {"size", file.size()}};
     WebSocket::instance()->send(QJsonDocument{json}.toJson());
 }
 

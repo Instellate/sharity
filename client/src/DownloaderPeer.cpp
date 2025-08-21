@@ -17,21 +17,36 @@ void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
     file->open(QIODeviceBase::Truncate | QIODeviceBase::WriteOnly, QFileDevice::ReadOwner | QFileDevice::WriteOther);
 
     channel->onClosed([this, channel] { std::erase(this->_channels, channel); });
-    channel->onMessage([file](const std::variant<rtc::binary, rtc::string> &message) {
+    channel->onMessage([this, file](const std::variant<rtc::binary, rtc::string> &message) {
         if (std::holds_alternative<rtc::string>(message)) {
             qWarning() << "Got string from datachannel when expected binary. Ignoring this message";
             return;
         }
 
         auto binary = std::get<rtc::binary>(message);
+
+        this->_amountDownloaded += binary.size();
+        emit amountDownloadedChanged();
+        this->_downloadedSinceTick += binary.size();
+
         const auto data = reinterpret_cast<char *>(binary.data());
         file->write(data, static_cast<qint64>(binary.size()));
     });
 }
 
+void DownloaderPeer::tick() {
+    this->_speed = this->_downloadedSinceTick.fetchAndStoreAcquire(0);
+    emit speedChanged();
+}
+
 DownloaderPeer::DownloaderPeer(QObject *parent) : QObject(parent) {
+    using namespace  std::chrono_literals;
     qDebug() << "Initializing DownloaderPeer";
     connect(WebSocket::instance(), &WebSocket::message, this, &DownloaderPeer::wsMessage);
+
+    this->_timer = new QTimer{this};
+    connect(this->_timer, &QTimer::timeout, this, &DownloaderPeer::tick);
+    this->_timer->setInterval(1s);
 
     rtc::Configuration config;
     const auto stunServers = WebSocket::instance()->stunServers();
@@ -53,6 +68,11 @@ DownloaderPeer::DownloaderPeer(QObject *parent) : QObject(parent) {
     });
 }
 
+QString DownloaderPeer::downloadState() { return this->_state; }
+qint64 DownloaderPeer::fileSize() const { return this->_fileSize; }
+qint64 DownloaderPeer::amountDownloaded() const { return this->_amountDownloaded; }
+qint64 DownloaderPeer::speed() const { return this->_speed; }
+
 // ReSharper disable once CppMemberFunctionMayBeConst
 void DownloaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
     if (type == "rtc_offer") {
@@ -70,7 +90,17 @@ void DownloaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
             return;
         }
 
+        this->_fileSize = json["size"].toInteger();
+        this->_state = "Downloading";
+        emit fileSizeChanged();
+        emit downloadStateChanged();
+
         const QJsonObject resp{{"type", "stream_accept"}};
         WebSocket::instance()->send(QJsonDocument{resp}.toJson());
+        this->_timer->start();
+    } else if (type == "stream_completed") {
+        this->_timer->stop();
+        this->_state = "Downloaded";
+        emit downloadStateChanged();
     }
 }
