@@ -17,7 +17,15 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2022_64'
 
+      - name: Cache LibDataChannel
+        id: cache-libdatachannel
+        uses: actions/cache@v4
+        with:
+          path: libdatachannel
+          key: ${{ runner.os }}-libdatachannel
+
       - name: Build LibDataChannel
+        if: steps.cache-libdatachannel.outputs.cache-hit != 'true'
         run: |
           cd ..
           git clone https://github.com/paullouisageneau/libdatachannel.git
@@ -33,10 +41,11 @@ jobs:
 
       - name: Build Sharity
         run: |
+          cd client
           cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
       - name: Pacakge NSIS
         run: |
-          cd build
+          cd client/build
           cpack .
