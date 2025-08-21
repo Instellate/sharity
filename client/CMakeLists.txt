@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 4.0)
-project(sharity-client)
+project(sharity-client VERSION 0.1.0)
+
+option(CONFIGURE_NSIS "Configures CPack for NSIS installer packaging" OFF)
+option(CONFIGURE_WIX "COnfigures CPack for msi installer packaging" OFF)
 
 include(FetchContent)
 
@@ -18,7 +21,6 @@ if (EMSCRIPTEN)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -sNO_DISABLE_EXCEPTION_CATCHING")
 else ()
   find_package(LibDataChannel CONFIG REQUIRED)
-
   set(LIBDATACHANNEL LibDataChannel::LibDataChannel)
 endif ()
 
@@ -71,7 +73,7 @@ target_link_libraries(
           vodozemac
           ${LIBDATACHANNEL})
 
-if (MSVC)
+if (WIN32)
  target_link_libraries(sharity-client PRIVATE bcrypt)
 endif ()
 
@@ -106,4 +108,17 @@ if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
 else ()
   target_compile_options(sharity-client PRIVATE -Wall -Wextra -Werror
                                                 -Wno-language-extension-token)
+endif ()
+
+if (WIN32 AND CONFIGURE_NSIS)
+  message(STATUS "Configuring NSIS Generator")
+  set(CPACK_GENERATOR NSIS)
+elseif (WIN32 AND CONFIGURE_WIX)
+  message(STATUS "Configuring WIX Generator")
+  set(CPACK_GENERATOR WIX)
+  set(CPACK_WIX_VERSION 4)
+endif ()
+
+if (DEFINED CPACK_GENERATOR)
+  include(cmake/ConfigureCPack.cmake)
 endif ()

@@ -1,5 +1,3 @@
-use std::u8;
-
 use vodozemac::olm::{Account, OlmMessage, Session, SessionConfig};
 use vodozemac::sas::{EstablishedSas, Sas, SasBytes};
 use vodozemac::{Curve25519PublicKey, Ed25519PublicKey, Ed25519Signature};
