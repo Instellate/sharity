@@ -15,6 +15,10 @@
 
 int main(int argc, char **argv) {
     QApplication app{argc, argv};
+    app.setOrganizationName("instellate");
+    app.setOrganizationDomain("https://instellate.xyz");
+    app.setApplicationName("Sharity");
+    app.setApplicationDisplayName("Sharity");
 
     QQmlEngine e;
     QQmlComponent component{&e};

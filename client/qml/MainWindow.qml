@@ -3,8 +3,8 @@ import QtQuick
 Window {
     id: root
     title: "Sharity"
-    width: 360
-    height: 240
+    width: 500
+    height: 500
 
     property bool sasConfirmed: false
 
