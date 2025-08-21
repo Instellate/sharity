@@ -21,6 +21,7 @@ jobs:
           git clone https://github.com/paullouisageneau/libdatachannel.git
           cd libdatachannel
           git checkout v0.23.1
+          git submodule update --init --recursive --depth 1
           cmake -B build -G "Visual Studio 17 2022" -DNO_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
           cmake --install build
