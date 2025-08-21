@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-nsis:
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - uses: actions/checkout@v5
 
@@ -27,7 +27,6 @@ jobs:
           cmake -B build -G "Visual Studio 17 2022" -DNO_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
           cmake --install build
-
 
       - name: Build Sharity
         run: |
