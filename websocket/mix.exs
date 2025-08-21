@@ -26,7 +26,9 @@ defmodule Sharity.MixProject do
       {:plug_cowboy, "~> 2.7"},
       {:websock_adapter, "~> 0.5.8"},
       {:bandit, "~> 1.7.0"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:cafezinho, "~> 0.4.4"},
+      {:lettuce, "~> 0.2.0", only: :dev}
     ]
   end
 

@@ -1,5 +1,6 @@
 defmodule Sharity.Router do
   use Plug.Router
+  require Logger
 
   plug(Plug.Logger)
   plug(:match)
@@ -30,31 +31,38 @@ defmodule Sharity.Router do
     else
       {:error, msg} ->
         put_resp_content_type(conn, "application/json")
-        send_resp(conn, 400, Jason.encode!(%{"message" => msg}))
+        |> send_resp(400, Jason.encode!(%{"message" => msg}))
 
       :error ->
         put_resp_content_type(conn, "application/json")
-        send_resp(conn, 400, Jason.encode!(%{"message" => "Invalid base64"}))
+        |> send_resp(400, Jason.encode!(%{"message" => "Invalid base64"}))
 
       v when is_integer(v) ->
         put_resp_content_type(conn, "application/json")
-        send_resp(conn, 400, Jason.encode!(%{"message" => "Invalid key size"}))
+        |> send_resp(400, Jason.encode!(%{"message" => "Invalid key size"}))
 
       _ ->
         put_resp_content_type(conn, "application/json")
-        send_resp(conn, 400, Jason.encode!(%{"message" => "Invalid params"}))
+        |> send_resp(400, Jason.encode!(%{"message" => "Invalid params"}))
     end
   end
 
   @spec handle_uploader(Plug.Conn.t(), binary()) :: term()
   defp handle_uploader(conn, public_key) do
-    with {:ok, true} <- Sharity.Downloaders.create(public_key, self()) do
+    IO.inspect(conn.query_params)
+    with %{"signature" => signature, "message" => message} <- conn.query_params,
+         {:ok, signature} <- Base.url_decode64(signature, padding: false),
+         :ok <- Cafezinho.verify(signature, message, public_key),
+         {:ok, true} <- Sharity.Downloaders.create(public_key, self()) do
       WebSockAdapter.upgrade(conn, Sharity.WsServer, [], timeout: 60_000)
       |> halt()
     else
       {:ok, false} ->
         put_resp_content_type(conn, "application/json")
-        send_resp(conn, 409, Jason.encode!(%{"message" => "Conflict"}))
+        |> send_resp(409, Jason.encode!(%{"message" => "Conflict"}))
+
+      _ ->
+        send_resp(conn, 400, Jason.encode!(%{"message" => "Bad request"}))
     end
   end
 
@@ -67,7 +75,7 @@ defmodule Sharity.Router do
 
       {:error, :not_found} ->
         put_resp_content_type(conn, "application/json")
-        send_resp(conn, 404, Jason.encode!(%{"message" => "Not found"}))
+        |> send_resp(404, Jason.encode!(%{"message" => "Not found"}))
     end
   end
 

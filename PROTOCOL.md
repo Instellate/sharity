@@ -10,7 +10,7 @@ There are three roles for this protocol works.
 - WebSocket Relay. A websocket relay used for control messages. The implementation of this is defined at [WebSocket Establishment](#websocket-establishment)
 
 ## WebSocket Establishment
-For the websocket establishment to work. The Uploader needs to generate a Ed25519 key.
+For the websocket establishment to work. The Uploader needs to generate an Ed25519 key.
 This key is shared out of bands to the Downloader.
 
 The websocket url is defined by the implementor. 
@@ -41,19 +41,19 @@ When this message has been sent it indicates that the WebSocket Relay will start
 
 ## Peer Handshake
 The peer handshake is done to switch the websocket communication to E2EE.
-This prevents a corrupt WebSocket Relay from eevesdropping or MiTM attacks.  
+This prevents a corrupt WebSocket Relay from eavesdropping or MiTM attacks.  
 The whole handshake is done in binary.
 
 The Downloader and Uploader creates an ephemeral Olm Account.  
 The Downloader sends their identity key and a one time key.  
-The Uploader creates a new outbounds Olm Sesssion based on these parameters.
+The Uploader creates a new outbounds Olm Session based on these parameters.
 The Uploader concatenates the Downloader's identity key, one time key, their own identity key,
 a pre message containing cryptographically strong random bytes and signs this using the private key 
 linked to the public key used in the `key` query parameter. The Uploader then sends this back to the Downloader.
 The Downloader verifies that the signature is valid against the public key, and that the echoed identity key is equal to their own.
 If the signature is invalid or the identity key echoed back is not equal to the own, the Downloader will terminate the connection.
 
-If everything is valid the Downloader creates a inbounds Olm Session based on the given parameters from the Uploader.  
+If everything is valid the Downloader creates an inbounds Olm Session based on the given parameters from the Uploader.  
 After this both peers switch to encrypting messages using Olm. All messages after this should be encrypted JSON.
 
 This only confirms the Uploader's identity to the Downloader. To confirm the Downloader's to the Uploader SAS is used.

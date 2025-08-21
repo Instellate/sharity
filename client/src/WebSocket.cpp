@@ -6,6 +6,7 @@
 #include <QtLogging>
 #include <exception>
 #include <optional>
+#include <qrandom.h>
 #include <string>
 #include <variant>
 
@@ -128,7 +129,14 @@ void WebSocket::handleDownloaderRequest(rtc::binary &&binary) {
     oneTimeKey.bytes = keyBuffer;
 
     auto session = this->_account.createOutboundSession(2, identityKey, oneTimeKey);
-    auto message = session.encrypt("hello");
+
+    QByteArray randomBuffer{};
+    randomBuffer.resize(16);
+    const auto random = QRandomGenerator::system();
+    random->generate(randomBuffer.begin(), randomBuffer.end());
+
+    const QString randomString = randomBuffer.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    auto message = session.encrypt(randomString.toStdString());
     this->_session = std::move(session);
 
     const auto binaryPtr = reinterpret_cast<uint8_t *>(binary.data());
@@ -257,11 +265,25 @@ void WebSocket::open(const QString &url, QString publicKey) {
 
 void WebSocket::open(const QString &url) {
     QString publicKey = this->publicKey();
-
     publicKey.replace('+', '-').replace('/', '_');
+
+    QByteArray randomBuffer{};
+    randomBuffer.resize(16);
+    const auto random = QRandomGenerator::system();
+    random->generate(randomBuffer.begin(), randomBuffer.end());
+
+    const QString rndMessage = randomBuffer.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    const QByteArray rndMessageBytes = rndMessage.toUtf8();
+
+    const std::array<uint8_t, 64> signature = this->_account.sign({rndMessageBytes.begin(), rndMessageBytes.end()});
+    const QByteArray qSignature{reinterpret_cast<const char *>(signature.data()), 64};
+    const QString base64Signature = qSignature.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+
     QUrlQuery query{};
     query.addQueryItem("key", publicKey);
     query.addQueryItem("type", "uploader");
+    query.addQueryItem("message", rndMessage);
+    query.addQueryItem("signature", base64Signature);
 
     QUrl fullUrl{url};
     fullUrl.setQuery(query);

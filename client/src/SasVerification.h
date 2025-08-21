@@ -16,6 +16,7 @@ class SasVerification : public QObject {
     QML_ELEMENT
 
     vodozemac::sas::Sas _sas;
+    QString _message;
 
     bool _sasConfirmed = false;
     bool _otherSasConfirmed = false;

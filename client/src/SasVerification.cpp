@@ -1,7 +1,9 @@
 #include "SasVerification.h"
 
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <qrandom.h>
+
 #include "Websocket.h"
 
 static QStringList emojiTable{"🐶", "🐱", "🦁", "🐎", "🦄", "🐷", "🐘", "🐰", "🐼", "🐓", "🐧", "🐢", "🐟",
@@ -16,8 +18,16 @@ SasVerification::SasVerification(QObject *parent) : QObject(parent) {
     connect(ws, &WebSocket::message, this, &SasVerification::wsMessage, Qt::QueuedConnection);
 
     if (ws->isDownloader()) {
+        QByteArray randomBuffer{};
+        randomBuffer.resize(16);
+        const auto random = QRandomGenerator::system();
+        random->generate(randomBuffer.begin(), randomBuffer.end());
+
+        this->_message = randomBuffer.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+
         const std::string sasToken = vodozemac::rustToStdString(this->_sas.publicKey().toBase64());
-        const QJsonObject json{{"type", "sas_token"}, {"sas_token", QString::fromStdString(sasToken)}};
+        const QJsonObject json{
+                {"type", "sas_token"}, {"sas_token", QString::fromStdString(sasToken)}, {"message", this->_message}};
         const QJsonDocument doc{json};
         ws->send(doc.toJson(QJsonDocument::Compact));
     }
@@ -29,7 +39,7 @@ bool SasVerification::otherSasConfirmed() const { return this->_otherSasConfirme
 
 QString SasVerification::emojis() const {
     QStringList list;
-    auto emojis = this->_sas.bytes("wow").emojiIndices();
+    const std::array<std::uint8_t, 7> emojis = this->_sas.bytes("wow").emojiIndices();
     for (const auto emoji: emojis) {
         list.emplace_back(emojiTable[emoji]);
     }
@@ -39,7 +49,7 @@ QString SasVerification::emojis() const {
 
 QString SasVerification::decimals() const {
     QStringList list;
-    auto decimals = this->_sas.bytes("sassy").decimals();
+    const std::array<std::uint16_t, 3> decimals = this->_sas.bytes(this->_message.toStdString()).decimals();
     for (const auto decimal: decimals) {
         list.emplace_back(QString::number(decimal));
     }
@@ -51,7 +61,7 @@ void SasVerification::confirmSas() {
     this->_sasConfirmed = true;
     emit sasConfirmedChanged();
 
-    QJsonObject json{{"type", "sas_confirmed"}};
+    const QJsonObject json{{"type", "sas_confirmed"}};
     WebSocket::instance()->send(QJsonDocument{json}.toJson());
 }
 
@@ -80,6 +90,8 @@ void SasVerification::wsMessage(const QString &type, const QJsonObject &json) {
         }
 
         if (!WebSocket::instance()->isDownloader()) {
+            this->_message = json["message"].toString();
+
             const std::string mySasToken = vodozemac::rustToStdString(this->_sas.publicKey().toBase64());
             const QJsonObject response{{"type", "sas_token"}, {"sas_token", QString::fromStdString(mySasToken)}};
             const QJsonDocument doc{response};
