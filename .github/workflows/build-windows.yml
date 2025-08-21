@@ -16,9 +16,6 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2022_64'
 
-      - name: Install OpenSSL
-        run: winget install ShiningLight.OpenSSL.Dev --disable-interactivity --accept-source-agreements --accept-package-agreements
-
       - name: Build LibDataChannel
         run: |
           git clone https://github.com/paullouisageneau/libdatachannel.git
