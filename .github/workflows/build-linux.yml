@@ -5,6 +5,8 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
+    if: "!contains(format('{0} {1}', github.event.head_commit.message, github.event.pull_request.title), '[ci-skip]')"
+
     steps:
       - uses: actions/checkout@v5
 

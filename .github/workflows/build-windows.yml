@@ -1,13 +1,14 @@
 name: Build Windows
 on:
   push:
-    branches: [ 'actions', 'main' ]
+    branches: [ 'main' ]
 
 # This job is to build a Windows Installer and will only run on main branch
 jobs:
   build-nsis:
     name: Build and Package NSIS
     runs-on: windows-2025
+    if: "!contains(format('{0} {1}', github.event.head_commit.message, github.event.pull_request.title), '[ci-skip]')"
 
     steps:
       - uses: actions/checkout@v5
