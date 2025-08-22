@@ -45,13 +45,12 @@ jobs:
         name: Install Rust
 
       - name: Build Vodozemac Bindings
-        run: |
-          cd vodozemac
-          cargo build
+        working-directory: ${{ github.workspace }}/vodozemac
+        run: cargo build
 
       - name: Build Sharity
+        working-directory: ${{ github.workspace }}/client
         run: |
-          cd client
           cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
@@ -61,6 +60,10 @@ jobs:
           apps: nsis
 
       - name: Pacakge NSIS
+        working-directory: ${{ github.workspace }}/client/build
         run: |
-          cd client/build
           cpack .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: ${{ github.workspace }}/client/build/Sharity-*-win64.exe
