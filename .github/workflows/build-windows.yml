@@ -40,7 +40,12 @@ jobs:
           cmake --install build
 
       - uses: dtolnay/rust-toolchain@stable
-        name: Setup Rust
+        name: Install Rust
+
+      - name: Build Vodozemac Bindings
+        run: |
+          cd vodozemac
+          cargo build
 
       - name: Build Sharity
         run: |
