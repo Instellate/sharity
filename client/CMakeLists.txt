@@ -112,6 +112,10 @@ else ()
                                                 -Wno-language-extension-token)
 endif ()
 
+if (WIN32 AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set_property(TARGET sharity-client PROPERTY WIN32_EXECUTABLE true)
+endif ()
+
 if (WIN32 AND CONFIGURE_NSIS)
   message(STATUS "Configuring NSIS Generator")
   set(CPACK_GENERATOR NSIS)
