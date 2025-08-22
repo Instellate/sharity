@@ -1,12 +1,14 @@
-name: build-windows.yml
+name: Build Windows
 on:
   push:
     branches: [ 'actions', 'main' ]
 
+# This job is to build a Windows Installer and will only run on main branch
 jobs:
   build-nsis:
     name: Build and Package NSIS
     runs-on: windows-2025
+
     steps:
       - uses: actions/checkout@v5
 
@@ -53,13 +55,10 @@ jobs:
           cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
-      - name: Install NSIS
-        run: |
-          iwr -useb get.scoop.sh -outfile 'install.ps1'
-          .\install.ps1 -RunAsAdmin
-          scoop update
-          scoop bucket add extras
-          scoop install nsis
+      - uses: winpax/scoop-setup@v1.0.0
+        with:
+          buckets: extras
+          apps: nsis
 
       - name: Pacakge NSIS
         run: |
