@@ -30,9 +30,9 @@ jobs:
           key: ${{ runner.os }}-libdatachannel
 
       - name: Build LibDataChannel
+        working-directory: ${{ runner.workspace }}
         if: steps.cache-libdatachannel.outputs.cache-hit != 'true'
         run: |
-          cd ..
           git clone https://github.com/paullouisageneau/libdatachannel.git
           cd libdatachannel
           git checkout v0.23.1
@@ -55,14 +55,14 @@ jobs:
           cmake --build build --config Release
 
       - uses: winpax/scoop-setup@v1.0.0
+        name: Install NSIS
         with:
           buckets: extras
           apps: nsis
 
       - name: Pacakge NSIS
         working-directory: ${{ github.workspace }}/client/build
-        run: |
-          cpack .
+        run: cpack .
 
       - uses: actions/upload-artifact@v4
         with:

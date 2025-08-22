@@ -1,6 +1,7 @@
 #include "Websocket.h"
 
 #include <QJsonObject>
+#include <QJsonDocument>
 #include <QMutexLocker>
 #include <QUrlQuery>
 #include <QtLogging>
