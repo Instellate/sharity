@@ -52,7 +52,7 @@ jobs:
 
       - name: Install LibDataChannel
         working-directory: ${{ runner.workspace }}/libdatachannel
-        run: cmake --install build
+        run: sudo cmake --install build
 
       - uses: dtolnay/rust-toolchain@stable
         name: Install Rust
