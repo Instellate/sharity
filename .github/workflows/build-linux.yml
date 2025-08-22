@@ -1,0 +1,70 @@
+name: Build Linux
+on: push
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    if: "!contains(format('{0} {1}', github.event.head_commit.message, github.event.pull_request.title), '[ci-skip]')"
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Dependencies
+        run: sudo apt update && sudo apt install -y libsrtp2-dev ninja-build
+
+      - name: Install CMake
+        working-directory: ${{ runner.workspace }}
+        run: |
+          mkdir cmake
+          cd cmake
+          curl -LO https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0-linux-x86_64.sh
+          chmod +x cmake-4.1.0-linux-x86_64.sh
+          ./cmake-4.1.0-linux-x86_64.sh --skip-license
+          rm cmake-4.1.0-linux-x86_64.sh
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+
+      - uses: dtolnay/rust-toolchain@stable
+        name: Install Rust
+
+      - uses: jurplel/install-qt-action@v4
+        name: Install Qt
+        with:
+          host: linux
+          dir: $RUNNER_WORKSPACE
+
+      - name: Cache LibDataChannel
+        id: cache-libdatachannel
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.workspace }}/libdatachannel
+          key: ${{ runner.os }}-libdatachannel
+
+      - name: Build LibDataChannel
+        working-directory: ${{ runner.workspace }}
+        if: steps.cache-libdatachannel.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/paullouisageneau/libdatachannel.git
+          cd libdatachannel
+          git checkout
+          git checkout v0.23.1
+          git submodule update --init --recursive --depth 1
+          cmake -B build -GNinja -DNO_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_SRTP=ON
+          cmake --build build
+
+      - name: Install LibDataChannel
+        working-directory: ${{ runner.workspace }}/libdatachannel
+        run: sudo cmake --install build
+
+      - uses: dtolnay/rust-toolchain@stable
+        name: Install Rust
+
+      - name: Build Vodozemac
+        working-directory: ${{ github.workspace }}/vodozemac
+        run: cargo build
+
+      - name: Build Sharity
+        working-directory: ${{ github.workspace }}/client
+        run: |
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build

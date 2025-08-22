@@ -1,0 +1,70 @@
+name: Build Windows
+on:
+  push:
+    branches: [ 'main' ]
+
+# This job is to build a Windows Installer and will only run on main branch
+jobs:
+  build-nsis:
+    name: Build and Package NSIS
+    runs-on: windows-2025
+    if: "!contains(format('{0} {1}', github.event.head_commit.message, github.event.pull_request.title), '[ci-skip]')"
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.1'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+
+      - name: Install CMake
+        uses: ssrobins/install-cmake@v1
+
+      - name: Cache LibDataChannel
+        id: cache-libdatachannel
+        uses: actions/cache@v4
+        with:
+          path: 'C:/Program Files (x86)/libdatachannel'
+          key: ${{ runner.os }}-libdatachannel
+
+      - name: Build LibDataChannel
+        working-directory: ${{ runner.workspace }}
+        if: steps.cache-libdatachannel.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/paullouisageneau/libdatachannel.git
+          cd libdatachannel
+          git checkout v0.23.1
+          git submodule update --init --recursive --depth 1
+          cmake -B build -G "Visual Studio 17 2022" -DNO_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          cmake --install build
+
+      - uses: dtolnay/rust-toolchain@stable
+        name: Install Rust
+
+      - name: Build Vodozemac Bindings
+        working-directory: ${{ github.workspace }}/vodozemac
+        run: cargo build
+
+      - name: Build Sharity
+        working-directory: ${{ github.workspace }}/client
+        run: |
+          cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+      - uses: winpax/scoop-setup@v1.0.0
+        name: Install NSIS
+        with:
+          buckets: extras
+          apps: nsis
+
+      - name: Pacakge NSIS
+        working-directory: ${{ github.workspace }}/client/build
+        run: cpack .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: ${{ github.workspace }}/client/build/Sharity-*-win64.exe
