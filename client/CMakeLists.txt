@@ -40,7 +40,8 @@ set(CMAKE_AUTOUIC ON)
 corrosion_import_crate(MANIFEST_PATH
                        ${CMAKE_SOURCE_DIR}/../vodozemac/Cargo.toml)
 
-if (MSVC AND ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo"))
+if (MSVC AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+  message(STATUS "Compiling Rust library with Debug version of the MSVC Runtime Library")
   corrosion_set_env_vars(vodozemac "CFLAGS=-MDd" "CXXFLAGS=-MDd")
 endif()
 
