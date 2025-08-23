@@ -31,7 +31,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         visible: peer.downloadState !== "Waiting"
         //: How much of the file has been downloaded out of the total amount
-        text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountDownloaded), Qt.locale().formattedDataSize(peer.fileSize))
+        text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountDownloaded)).arg(Qt.locale().formattedDataSize(peer.fileSize))
         color: palette.text
     }
 
