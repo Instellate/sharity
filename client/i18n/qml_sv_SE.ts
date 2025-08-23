@@ -42,6 +42,11 @@
 <context>
     <name>Downloader</name>
     <message>
+        <location filename="../qml/Downloader.qml" line="13"/>
+        <source>Downloader</source>
+        <translation>Nedladdare</translation>
+    </message>
+    <message>
         <location filename="../qml/Downloader.qml" line="21"/>
         <source>Waiting</source>
         <translation>Väntar</translation>
@@ -119,17 +124,17 @@
         <translation>Emojis</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="58"/>
+        <location filename="../qml/Sas.qml" line="59"/>
         <source>Are they equal?</source>
         <translation>Är dem samma?</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="68"/>
+        <location filename="../qml/Sas.qml" line="69"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="73"/>
+        <location filename="../qml/Sas.qml" line="74"/>
         <source>No</source>
         <translation>Nej</translation>
     </message>

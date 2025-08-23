@@ -10,7 +10,7 @@ ColumnLayout {
     Label {
         Layout.alignment: Qt.AlignHCenter
 
-        text: "Downloader"
+        text: qsTr("Downloader")
     }
 
     Label {

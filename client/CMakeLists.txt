@@ -46,7 +46,9 @@ if (MSVC AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Re
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml LinguistTools)
-qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES sv_SE)
+qt_standard_project_setup(
+  I18N_SOURCE_LANGUAGE en_GB
+  I18N_TRANSLATED_LANGUAGES sv_SE)
 
 if (QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)

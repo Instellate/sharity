@@ -53,7 +53,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         visible: root.isUploading
         //: How much of the file has been downloaded
-        text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountUploaded), Qt.locale().formattedDataSize(peer.fileSize))
+        text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountUploaded)).arg(Qt.locale().formattedDataSize(peer.fileSize))
         color: palette.text
     }
 
