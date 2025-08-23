@@ -47,6 +47,7 @@ ColumnLayout {
         sourceComponent: Label {
             Layout.alignment: Qt.AlignHCenter
 
+            font.pointSize: 16
             text: root.displayEmojis ? sas.emojis : sas.decimals
         }
     }
