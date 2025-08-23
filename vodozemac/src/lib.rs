@@ -67,6 +67,8 @@ mod ffi {
 
         fn sign(self: &OlmAccount, message: &[u8]) -> [u8; 64];
 
+        fn regenerate(self: &mut OlmAccount);
+
         #[cxx_name = "createOutboundSession"]
         fn create_outbound_session(
             self: &OlmAccount,
@@ -233,6 +235,11 @@ impl OlmAccount {
             session: Box::new(OlmSession(result.session)),
             plaintext: result.plaintext,
         })
+    }
+
+    fn regenerate(&mut self) {
+        let mut account = Account::new();
+        std::mem::swap(&mut self.0, &mut account);
     }
 }
 

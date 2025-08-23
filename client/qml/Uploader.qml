@@ -17,7 +17,7 @@ ColumnLayout {
 
     Button {
         Layout.alignment: Qt.AlignHCenter
-        enabled: !root.isUploading
+        visible: !root.isUploading
 
         text: "Select file"
         onClicked: fileDialog.open()
@@ -39,7 +39,8 @@ ColumnLayout {
 
     Button {
         Layout.alignment: Qt.AlignHCenter
-        enabled: fileDialog.selectedFiles.length > 0 && !root.isUploading
+        visible: !root.isUploading
+        enabled: fileDialog.selectedFiles.length > 0
 
         text: "Upload file"
         onClicked: {
@@ -48,13 +49,35 @@ ColumnLayout {
         }
     }
 
+    Label {
+        Layout.alignment: Qt.AlignHCenter
+        visible: root.isUploading
+        text: `${Qt.locale().formattedDataSize(peer.amountUploaded)} out of ${Qt.locale().formattedDataSize(peer.fileSize)}`
+        color: palette.text
+    }
+
+    Label {
+        Layout.alignment: Qt.AlignHCenter
+        visible: root.isUploading
+        text: `${Qt.locale().formattedDataSize(peer.speed)}/s`
+    }
+
     FileDialog {
         id: fileDialog
         fileMode: FileDialog.OpenFile
     }
 
+    Button {
+        text: "Cancel"
+        enabled: !root.isUploading
+
+        onClicked: WebSocket.close()
+    }
+
     UploaderPeer {
         id: peer
         selectedFile: fileDialog.selectedFile
+
+        onFileUploaded: root.isUploading = false
     }
 }

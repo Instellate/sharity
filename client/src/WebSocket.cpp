@@ -1,7 +1,7 @@
 #include "Websocket.h"
 
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QMutexLocker>
 #include <QUrlQuery>
 #include <QtLogging>
@@ -243,7 +243,14 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
         this->_established = false;
         this->_publicKey = std::nullopt;
         this->_session = std::nullopt;
+        this->_stunServers.clear();
+        this->_account.regenerate();
+
         emit connectedChanged();
+        emit encryptedChanged();
+        emit connectedChanged();
+        emit stunServersChanged();
+        emit isDownloaderChanged();
     });
 }
 
@@ -262,6 +269,7 @@ void WebSocket::open(const QString &url, QString publicKey) {
     this->_publicKey = vodozemac::Ed25519PublicKey::fromBase64(pubKeyCopy.toStdString());
     this->_ws.onMessage([this](auto message) { this->onMessage(std::move(message)); });
     this->_ws.open(fullUrl.toString().toStdString());
+    emit isDownloaderChanged();
 }
 
 void WebSocket::open(const QString &url) {

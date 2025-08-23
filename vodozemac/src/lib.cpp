@@ -14,6 +14,8 @@ namespace vodozemac::olm {
         return Session{std::move(session)};
     }
 
+    void Account::regenerate() { this->_account->regenerate(); }
+
     std::tuple<Session, std::vector<uint8_t>> Account::createInboundSession(const Curve25519PublicKey &theirIdentityKey,
                                                                             const OlmMessage &message) {
         ffi::OlmInboundCreationResult result = this->_account->createInboundSession(theirIdentityKey, message);
@@ -31,6 +33,7 @@ namespace vodozemac::olm {
     OlmMessage Session::encrypt(const std::string &plaintext) { return this->_session->encrypt(plaintext); }
 
     rust::Vec<uint8_t> Session::decrypt(const OlmMessage &message) { return this->_session->decrypt(message); }
+
 } // namespace vodozemac::olm
 
 namespace vodozemac::sas {

@@ -27,7 +27,12 @@ void UploaderPeer::startRtcNegotiation() {
         qDebug() << "Data channel" << channel->label() << "for uploading was opened";
         this->_streamFuture = QtConcurrent::run(&UploaderPeer::handleFileUpload, this, channel);
     });
-    channel->onClosed([channel] { qDebug() << "Data channel" << channel->label() << "has been closed"; });
+    channel->onClosed([channel, this] {
+        qDebug() << "Data channel" << channel->label() << "has been closed";
+        this->_streamFuture.cancel();
+    });
+
+    this->_timer->start();
 }
 
 void UploaderPeer::handleFileUpload(const DataChannel &channel) {
@@ -36,20 +41,27 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     QFile file{localFile};
     file.open(QIODeviceBase::ReadOnly);
 
-    constexpr size_t minimumBufferSize = 1024 * 1024 * 5;
-    auto promise = std::make_shared<std::promise<void>>();
-    channel->setBufferedAmountLowThreshold(minimumBufferSize);
-    channel->onBufferedAmountLow([promise] { promise->set_value(); });
+    this->_fileSize = file.size();
+    emit fileSizeChanged();
 
     const auto bufferSize = static_cast<qint64>(channel->maxMessageSize());
-    const auto buffer = new char[channel->maxMessageSize()];
+    const auto buffer = new char[bufferSize];
+
+    auto promise = std::make_shared<std::promise<void>>();
+    channel->setBufferedAmountLowThreshold(bufferSize * 2);
+    channel->onBufferedAmountLow([promise] { promise->set_value(); });
 
     bool failed = false;
     try {
         while (!file.atEnd() && !this->_streamFuture.isCanceled()) {
             const qint64 dataRead = file.read(buffer, bufferSize);
             channel->send(reinterpret_cast<std::byte *>(buffer), dataRead);
-            if (channel->bufferedAmount() > minimumBufferSize * 2) {
+
+            this->_amountUploaded += dataRead;
+            emit amountUploadedChanged();
+            this->_uploadedSinceTick += dataRead;
+
+            if (channel->bufferedAmount() > static_cast<size_t>(bufferSize) * 10) {
                 promise->get_future().wait();
                 *promise = std::promise<void>{};
             }
@@ -69,17 +81,28 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
 
     delete[] buffer;
     channel->close();
+    this->_timer->stop();
 }
 
 UploaderPeer::UploaderPeer(QObject *parent) : QObject(parent) {
+    using namespace std::chrono_literals;
+
     qDebug() << "Initializing UploaderPeer";
     connect(WebSocket::instance(), &WebSocket::message, this, &UploaderPeer::wsMessage);
+
+    this->_timer = new QTimer{this};
+    connect(this->_timer, &QTimer::timeout, this, &UploaderPeer::tick);
+    this->_timer->setInterval(1s);
 }
 
 UploaderPeer::~UploaderPeer() {
     this->_streamFuture.cancel();
     this->_streamFuture.waitForFinished();
 }
+
+qint64 UploaderPeer::amountUploaded() const { return this->_amountUploaded; }
+qint64 UploaderPeer::fileSize() const { return this->_fileSize; }
+qint64 UploaderPeer::speed() const { return this->_speed; }
 
 QUrl UploaderPeer::selectedFile() const { return this->_selectedFile; }
 void UploaderPeer::setSelectedFile(const QUrl &url) {
@@ -88,7 +111,7 @@ void UploaderPeer::setSelectedFile(const QUrl &url) {
 }
 
 void UploaderPeer::startFileNegotiation() const {
-    QFile file{this->_selectedFile.toLocalFile()};
+    const QFile file{this->_selectedFile.toLocalFile()};
 
     qDebug() << "Starting file negotiation for file" << this->_selectedFile.fileName();
     const QJsonObject json{{"type", "stream_request"}, {"stream_type", "upload"}, {"size", file.size()}};
@@ -106,4 +129,10 @@ void UploaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
     } else if (type == "stream_accept") {
         this->startRtcNegotiation();
     }
+}
+
+void UploaderPeer::tick() {
+    qInfo() << "Tick upload is" << this->_uploadedSinceTick;
+    this->_speed = this->_uploadedSinceTick.fetchAndStoreAcquire(0);
+    emit speedChanged();
 }

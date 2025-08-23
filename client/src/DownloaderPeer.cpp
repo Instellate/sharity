@@ -26,21 +26,16 @@ void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
         auto binary = std::get<rtc::binary>(message);
 
         this->_amountDownloaded += binary.size();
-        emit amountDownloadedChanged();
         this->_downloadedSinceTick += binary.size();
 
         const auto data = reinterpret_cast<char *>(binary.data());
         file->write(data, static_cast<qint64>(binary.size()));
     });
-}
-
-void DownloaderPeer::tick() {
-    this->_speed = this->_downloadedSinceTick.fetchAndStoreAcquire(0);
-    emit speedChanged();
+    emit amountDownloadedChanged();
 }
 
 DownloaderPeer::DownloaderPeer(QObject *parent) : QObject(parent) {
-    using namespace  std::chrono_literals;
+    using namespace std::chrono_literals;
     qDebug() << "Initializing DownloaderPeer";
     connect(WebSocket::instance(), &WebSocket::message, this, &DownloaderPeer::wsMessage);
 
@@ -103,4 +98,10 @@ void DownloaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
         this->_state = "Downloaded";
         emit downloadStateChanged();
     }
+}
+
+void DownloaderPeer::tick() {
+    this->_speed = this->_downloadedSinceTick.fetchAndStoreAcquire(0);
+    emit speedChanged();
+    emit amountDownloadedChanged();
 }

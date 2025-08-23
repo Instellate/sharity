@@ -10,9 +10,7 @@ namespace vodozemac {
     using Ed25519PublicKey = ffi::Ed25519PublicKey;
     using Curve25519PublicKey = ffi::Curve25519PublicKey;
 
-    inline std::string rustToStdString(rust::String &&string) {
-        return {string.begin(), string.end()};
-    }
+    inline std::string rustToStdString(rust::String &&string) { return {string.begin(), string.end()}; }
 } // namespace vodozemac
 
 namespace vodozemac::olm {
@@ -42,6 +40,8 @@ namespace vodozemac::olm {
         createInboundSession(const Curve25519PublicKey &theirIdentityKey, const OlmMessage &message);
 
         [[nodiscard]] std::array<uint8_t, 64> sign(const std::vector<uint8_t> &message) const;
+
+        void regenerate();
     };
 
     class Session {

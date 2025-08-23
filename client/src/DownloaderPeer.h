@@ -19,8 +19,8 @@ class DownloaderPeer : public QObject {
 
     std::shared_ptr<rtc::PeerConnection> _peer;
     std::vector<DataChannel> _channels;
-    QTimer *_timer;
 
+    QTimer *_timer;
     QAtomicInteger<qint64> _downloadedSinceTick;
 
     QString _state = "Waiting";
@@ -30,7 +30,6 @@ class DownloaderPeer : public QObject {
     qint64 _speed = 0;
 
     void handleDataChannel(const DataChannel &channel);
-    void tick();
 
 public:
     explicit DownloaderPeer(QObject *parent = nullptr);
@@ -48,4 +47,5 @@ signals:
 
 private slots:
     void wsMessage(const QString &type, const QJsonObject &json);
+    void tick();
 };

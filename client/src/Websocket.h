@@ -15,11 +15,11 @@
 class WebSocket : public QObject {
     Q_OBJECT
     Q_PROPERTY(QStringList stunServers READ stunServers NOTIFY stunServersChanged)
-    Q_PROPERTY(QString publicKey READ publicKey)
+    Q_PROPERTY(QString publicKey READ publicKey NOTIFY publicKeyChanged)
     Q_PROPERTY(bool established READ established NOTIFY establishedChanged)
     Q_PROPERTY(bool encrypted READ encrypted NOTIFY encryptedChanged)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
-    Q_PROPERTY(bool isDownloader READ isDownloader)
+    Q_PROPERTY(bool isDownloader READ isDownloader NOTIFY isDownloaderChanged)
     QML_ELEMENT
     QML_SINGLETON
 
@@ -73,6 +73,8 @@ signals:
     void establishedChanged();
     void encryptedChanged();
     void connectedChanged();
+    void publicKeyChanged();
+    void isDownloaderChanged();
 
     void message(const QString &type, const QJsonObject &json);
 };
