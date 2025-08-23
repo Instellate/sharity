@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
+import QtQuick.Controls.Material
 
 ColumnLayout {
     id: root
@@ -16,7 +16,7 @@ ColumnLayout {
         id: sas
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
 
         text: {
@@ -44,18 +44,19 @@ ColumnLayout {
         active: root.displaySas
         Layout.alignment: Qt.AlignHCenter
 
-        sourceComponent: Text {
+        sourceComponent: Label {
             Layout.alignment: Qt.AlignHCenter
 
             text: root.displayEmojis ? sas.emojis : sas.decimals
         }
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
         visible: root.displaySas
 
         text: "Are they equal?"
+        color: palette.text
     }
 
     RowLayout {

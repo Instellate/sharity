@@ -1,30 +1,31 @@
-import QtQml
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls.Material
 
 ColumnLayout {
     DownloaderPeer {
         id: peer
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
 
         text: "Downloader"
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
         text: peer.downloadState
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
         visible: peer.downloadState !== "Waiting"
         text: `${Qt.locale().formattedDataSize(peer.amountDownloaded)} out of ${Qt.locale().formattedDataSize(peer.fileSize)}`
+        color: palette.text
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
         visible: peer.downloadState !== "Waiting"
         text: `${Qt.locale().formattedDataSize(peer.speed)}/s`

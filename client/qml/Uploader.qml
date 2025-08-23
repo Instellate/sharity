@@ -1,17 +1,18 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import QtQuick.Dialogs
+import QtQuick.Controls.Material
 
 ColumnLayout {
     id: root
 
     property bool isUploading: false
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
 
         text: "Uploader"
+        color: palette.text
     }
 
     Button {
@@ -22,7 +23,7 @@ ColumnLayout {
         onClicked: fileDialog.open()
     }
 
-    Text {
+    Label {
         Layout.alignment: Qt.AlignHCenter
 
         text: {
