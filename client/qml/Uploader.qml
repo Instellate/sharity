@@ -11,7 +11,7 @@ ColumnLayout {
     Label {
         Layout.alignment: Qt.AlignHCenter
 
-        text: "Uploader"
+        text: qsTr("Uploader")
         color: palette.text
     }
 
@@ -19,7 +19,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         visible: !root.isUploading
 
-        text: "Select file"
+        text: qsTr("Select file")
         onClicked: fileDialog.open()
     }
 
@@ -28,12 +28,12 @@ ColumnLayout {
 
         text: {
             if (fileDialog.selectedFiles.length <= 0) {
-                return "No file selected";
+                return qsTr("No file selected");
             }
 
             const path = fileDialog.selectedFile.toString().replace(/^(file:\/{2})/, "");
             const cleanPath = decodeURIComponent(path);
-            return `Selected file: ${cleanPath}`;
+            return qsTr("Selected file: %1").arg(cleanPath);
         }
     }
 
@@ -42,7 +42,7 @@ ColumnLayout {
         visible: !root.isUploading
         enabled: fileDialog.selectedFiles.length > 0
 
-        text: "Upload file"
+        text: qsTr("Upload file")
         onClicked: {
             root.isUploading = true;
             peer.startFileNegotiation();
@@ -52,7 +52,8 @@ ColumnLayout {
     Label {
         Layout.alignment: Qt.AlignHCenter
         visible: root.isUploading
-        text: `${Qt.locale().formattedDataSize(peer.amountUploaded)} out of ${Qt.locale().formattedDataSize(peer.fileSize)}`
+        //: How much of the file has been downloaded
+        text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountUploaded), Qt.locale().formattedDataSize(peer.fileSize))
         color: palette.text
     }
 
@@ -76,7 +77,7 @@ ColumnLayout {
     Button {
         Layout.alignment: Qt.AlignHCenter
 
-        text: "Cancel"
+        text: qsTr("Cancel")
         onClicked: {
             peer.close();
             WebSocket.close();

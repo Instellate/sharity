@@ -15,13 +15,23 @@ ColumnLayout {
 
     Label {
         Layout.alignment: Qt.AlignHCenter
-        text: peer.downloadState
+        text: {
+            switch (peer.downloadState) {
+            case "Waiting":
+                return qsTr("Waiting");
+            case "Downloading":
+                return qsTr("Downloading");
+            case "Downloaded":
+                return qsTr("Downloaded");
+            }
+        }
     }
 
     Label {
         Layout.alignment: Qt.AlignHCenter
         visible: peer.downloadState !== "Waiting"
-        text: `${Qt.locale().formattedDataSize(peer.amountDownloaded)} out of ${Qt.locale().formattedDataSize(peer.fileSize)}`
+        //: How much of the file has been downloaded out of the total amount
+        text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountDownloaded), Qt.locale().formattedDataSize(peer.fileSize))
         color: palette.text
     }
 
@@ -40,7 +50,7 @@ ColumnLayout {
     Button {
         Layout.alignment: Qt.AlignHCenter
 
-        text: "Cancel"
+        text: qsTr("Cancel")
         onClicked: {
             peer.close();
             WebSocket.close();

@@ -3,6 +3,7 @@ import QtQuick.Controls.Material
 
 ApplicationWindow {
     id: root
+    visible: true
     title: "Sharity"
     width: 500
     height: 500

@@ -33,9 +33,9 @@ FetchContent_MakeAvailable(Corrosion)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTOMOC ON)
+# set(CMAKE_AUTORCC ON)
+# set(CMAKE_AUTOUIC ON)
 
 corrosion_import_crate(MANIFEST_PATH
                        ${CMAKE_SOURCE_DIR}/../vodozemac/Cargo.toml)
@@ -45,8 +45,8 @@ if (MSVC AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Re
   corrosion_set_env_vars(vodozemac "CFLAGS=-MDd" "CXXFLAGS=-MDd")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml)
-qt_standard_project_setup()
+find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml LinguistTools)
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES sv_SE)
 
 if (QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
@@ -57,13 +57,13 @@ if (EMSCRIPTEN)
   qt_add_resources(SHARITY_RESOURCES resources.qrc)
 endif ()
 
-qt_add_executable(sharity-client src/main.cpp src/WebSocket.cpp src/Websocket.h ${SHARITY_RESOURCES}
+qt_add_executable(sharity-client 
+        src/main.cpp src/WebSocket.cpp 
+        src/Websocket.h
         src/SasVerification.cpp
-        src/SasVerification.h
         src/DownloaderPeer.cpp
-        src/DownloaderPeer.h
         src/UploaderPeer.cpp
-        src/UploaderPeer.h)
+        ${SHARITY_RESOURCES})
 target_link_libraries(
   sharity-client
   PRIVATE Qt6::Core
@@ -103,6 +103,13 @@ qt_add_qml_module(sharity-client
   RESOURCE_PREFIX /qt/qml
   QML_FILES ${QML_FILES}
   SOURCES src/Websocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h)
+
+qt_add_translations(
+  sharity-client
+  TS_FILE_BASE qml
+  TS_FILE_DIR i18n
+  TS_OUTPUT_DIRECTORY i18n
+  RESOURCE_PREFIX /qt/qml/Sharity/i18n)
 
 if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
   target_compile_options(sharity-client PUBLIC "/Zc:__cplusplus")

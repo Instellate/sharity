@@ -21,14 +21,14 @@ ColumnLayout {
 
         text: {
             if (!sas.sasEstablished) {
-                return "Waiting to establish SAS";
+                return qsTr("Waiting to establish SAS");
             } else if (!sas.sasConfirmed) {
-                return "Verify with the other that the values are equal";
+                return qsTr("Verify with the other that the values are equal");
             } else if (!sas.otherSasConfirmed) {
-                return "Waiting on the other the confirm";
+                return qsTr("Waiting on the other the confirm");
             }
 
-            return "Both confirmed equal sas";
+            return qsTr("Both confirmed equal sas");
         }
     }
 
@@ -36,7 +36,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
 
         visible: root.displaySas
-        text: root.displayEmojis ? "Numbers" : "Emojis"
+        text: root.displayEmojis ? qsTr("Numbers") : qsTr("Emojis")
         onClicked: root.displayEmojis = !root.displayEmojis
     }
 
@@ -55,7 +55,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         visible: root.displaySas
 
-        text: "Are they equal?"
+        text: qsTr("Are they equal?")
         color: palette.text
     }
 
@@ -65,12 +65,12 @@ ColumnLayout {
         enabled: !sas.sasConfirmed
 
         Button {
-            text: "Yes"
+            text: qsTr("Yes")
             onClicked: sas.confirmSas()
         }
 
         Button {
-            text: "No"
+            text: qsTr("No")
             onClicked: sas.declineSas()
         }
     }

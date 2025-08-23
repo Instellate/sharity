@@ -20,7 +20,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
 
         text: "wss://sharity.is-dominating.me/ws"
-        placeholderText: "WebSocket Relay"
+        placeholderText: qsTr("WebSocket Relay")
     }
 
     ColumnLayout {
@@ -31,17 +31,17 @@ ColumnLayout {
         Label {
             Layout.alignment: Qt.AlignHCenter
 
-            text: "Type"
+            text: qsTr("Type")
         }
 
         RadioButton {
             id: uploaderRadioButton
-            text: "Uploader"
+            text: qsTr("Uploader")
             checked: true
         }
 
         RadioButton {
-            text: "Downloader"
+            text: qsTr("Downloader")
         }
     }
 
@@ -64,7 +64,7 @@ ColumnLayout {
         // The margins are here to prevent UI from moving 
         // when changing between uploader and downloader
 
-        text: "Copy Connection Key"
+        text: qsTr("Copy Connection Key")
         onClicked: {
             connectionKey.selectAll();
             connectionKey.copy();
@@ -79,13 +79,13 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
 
         onAccepted: WebSocket.open(websocketUrl.text, text)
-        placeholderText: "Connection Key"
+        placeholderText: qsTr("Connection Key")
     }
 
     Button {
         Layout.alignment: Qt.AlignHCenter
 
-        text: "Connect"
+        text: qsTr("Connect")
         onClicked: {
             if (root.isUploader) {
                 WebSocket.open(websocketUrl.text);
@@ -95,3 +95,4 @@ ColumnLayout {
         }
     }
 }
+

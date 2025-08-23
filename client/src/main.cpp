@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QFile>
+#include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickWindow>
@@ -14,20 +15,11 @@
 #include <rtc/rtc.hpp>
 
 int main(int argc, char **argv) {
-    QApplication app{argc, argv};
+    QGuiApplication app{argc, argv};
     app.setOrganizationName("instellate");
     app.setOrganizationDomain("https://instellate.xyz");
     app.setApplicationName("Sharity");
     app.setApplicationDisplayName("Sharity");
-
-    QQmlEngine e;
-    QQmlComponent component{&e};
-    component.loadFromModule("Sharity", "MainWindow");
-
-    QObject *object = component.create();
-    if (object == nullptr) {
-        qFatal() << "Component creation failed. Get error: \n" << qPrintable(component.errorString());
-    }
 
 #ifdef Q_OS_WASM
     // Loads in twemoji emojis for WASM targets
@@ -49,8 +41,8 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    QQuickWindow *window = qobject_cast<QQuickWindow *>(object);
-    window->show();
+    QQmlApplicationEngine engine{"Sharity", "MainWindow"};
+    engine.setUiLanguage(QLocale::system().name());
 
     return app.exec();
 }
