@@ -56,6 +56,12 @@ ColumnLayout {
         color: palette.text
     }
 
+    ProgressBar {
+        Layout.alignment: Qt.AlignHCenter
+        visible: root.isUploading
+        value: peer.amountUploaded / peer.fileSize
+    }
+
     Label {
         Layout.alignment: Qt.AlignHCenter
         visible: root.isUploading
