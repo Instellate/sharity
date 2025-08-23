@@ -14,9 +14,13 @@ void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
     qDebug() << "Got data channel" << channel->label();
     const QDir downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     auto file = QSharedPointer<QFile>::create(downloadPath.filePath(QString::fromStdString(channel->label())));
-    file->open(QIODeviceBase::Truncate | QIODeviceBase::WriteOnly, QFileDevice::ReadOwner | QFileDevice::WriteOther);
 
-    channel->onClosed([this, channel] { std::erase(this->_channels, channel); });
+    file->open(QIODeviceBase::WriteOnly, QFileDevice::ReadUser | QFileDevice::WriteUser);
+
+    channel->onClosed([this, channel] {
+        qInfo() << "Data channel " << channel->label() << "got closed";
+        std::erase(this->_channels, channel); 
+    });
     channel->onMessage([this, file](const std::variant<rtc::binary, rtc::string> &message) {
         if (std::holds_alternative<rtc::string>(message)) {
             qWarning() << "Got string from datachannel when expected binary. Ignoring this message";
@@ -31,7 +35,6 @@ void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
         const auto data = reinterpret_cast<char *>(binary.data());
         file->write(data, static_cast<qint64>(binary.size()));
     });
-    emit amountDownloadedChanged();
 }
 
 DownloaderPeer::DownloaderPeer(QObject *parent) : QObject(parent) {
@@ -63,10 +66,23 @@ DownloaderPeer::DownloaderPeer(QObject *parent) : QObject(parent) {
     });
 }
 
+DownloaderPeer::~DownloaderPeer() {
+    for (const auto &channel: this->_channels) {
+        channel->close();
+    }
+}
+
 QString DownloaderPeer::downloadState() { return this->_state; }
 qint64 DownloaderPeer::fileSize() const { return this->_fileSize; }
 qint64 DownloaderPeer::amountDownloaded() const { return this->_amountDownloaded; }
 qint64 DownloaderPeer::speed() const { return this->_speed; }
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void DownloaderPeer::close() {
+    for (const auto &channel: this->_channels) {
+        channel->close();
+    }
+}
 
 // ReSharper disable once CppMemberFunctionMayBeConst
 void DownloaderPeer::wsMessage(const QString &type, const QJsonObject &json) {

@@ -45,6 +45,7 @@ public:
     void setSelectedFile(const QUrl &url);
 
     Q_INVOKABLE void startFileNegotiation() const;
+    Q_INVOKABLE void close();
 
 signals:
     void selectedFileChanged();

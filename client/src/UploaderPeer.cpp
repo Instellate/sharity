@@ -53,7 +53,7 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
 
     bool failed = false;
     try {
-        while (!file.atEnd() && !this->_streamFuture.isCanceled()) {
+        while (!file.atEnd() && !this->_streamFuture.isCanceled() && !channel->isClosed()) {
             const qint64 dataRead = file.read(buffer, bufferSize);
             channel->send(reinterpret_cast<std::byte *>(buffer), dataRead);
 
@@ -95,10 +95,7 @@ UploaderPeer::UploaderPeer(QObject *parent) : QObject(parent) {
     this->_timer->setInterval(1s);
 }
 
-UploaderPeer::~UploaderPeer() {
-    this->_streamFuture.cancel();
-    this->_streamFuture.waitForFinished();
-}
+UploaderPeer::~UploaderPeer() { this->_streamFuture.cancel(); }
 
 qint64 UploaderPeer::amountUploaded() const { return this->_amountUploaded; }
 qint64 UploaderPeer::fileSize() const { return this->_fileSize; }
@@ -118,6 +115,8 @@ void UploaderPeer::startFileNegotiation() const {
     WebSocket::instance()->send(QJsonDocument{json}.toJson());
 }
 
+void UploaderPeer::close() { this->_streamFuture.cancel(); }
+
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UploaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
     if (type == "rtc_answer") {
@@ -132,7 +131,6 @@ void UploaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
 }
 
 void UploaderPeer::tick() {
-    qInfo() << "Tick upload is" << this->_uploadedSinceTick;
     this->_speed = this->_uploadedSinceTick.fetchAndStoreAcquire(0);
     emit speedChanged();
 }

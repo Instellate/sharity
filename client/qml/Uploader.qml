@@ -68,10 +68,13 @@ ColumnLayout {
     }
 
     Button {
-        text: "Cancel"
-        enabled: !root.isUploading
+        Layout.alignment: Qt.AlignHCenter
 
-        onClicked: WebSocket.close()
+        text: "Cancel"
+        onClicked: {
+            peer.close();
+            WebSocket.close();
+        }
     }
 
     UploaderPeer {

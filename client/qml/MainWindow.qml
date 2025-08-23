@@ -12,6 +12,13 @@ ApplicationWindow {
 
     property bool sasConfirmed: false
 
+    Connections {
+        target: WebSocket
+        function onConnectedChanged() {
+            root.sasConfirmed = false;
+        }
+    }
+
     Loader {
         anchors.centerIn: parent
 

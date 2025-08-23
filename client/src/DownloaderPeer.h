@@ -34,10 +34,14 @@ class DownloaderPeer : public QObject {
 public:
     explicit DownloaderPeer(QObject *parent = nullptr);
 
+    ~DownloaderPeer() override;
+
     [[nodiscard]] QString downloadState();
     [[nodiscard]] qint64 fileSize() const;
     [[nodiscard]] qint64 amountDownloaded() const;
     [[nodiscard]] qint64 speed() const;
+
+    Q_INVOKABLE void close();
 
 signals:
     void downloadStateChanged();
