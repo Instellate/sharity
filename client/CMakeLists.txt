@@ -54,14 +54,17 @@ if (QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
 endif ()
 
+
+set(RESOURCE_FILES icons.qrc)
 if (EMSCRIPTEN)
   message(STATUS "Adding twemoji resources")
-  qt_add_resources(SHARITY_RESOURCES resources.qrc)
+  list(APPEND RESOURCE_FILES fonts.qrc)
 endif ()
+qt_add_resources(SHARITY_RESOURCES ${RESOURCE_FILES})
 
 qt_add_executable(sharity-client 
-        src/main.cpp src/WebSocket.cpp 
-        src/Websocket.h
+        src/main.cpp
+        src/WebSocket.cpp
         src/SasVerification.cpp
         src/DownloaderPeer.cpp
         src/UploaderPeer.cpp

@@ -72,7 +72,7 @@ DownloaderPeer::~DownloaderPeer() {
     }
 }
 
-QString DownloaderPeer::downloadState() { return this->_state; }
+DownloaderPeer::State DownloaderPeer::downloadState() const { return this->_state; }
 qint64 DownloaderPeer::fileSize() const { return this->_fileSize; }
 qint64 DownloaderPeer::amountDownloaded() const { return this->_amountDownloaded; }
 qint64 DownloaderPeer::speed() const { return this->_speed; }
@@ -102,7 +102,7 @@ void DownloaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
         }
 
         this->_fileSize = json["size"].toInteger();
-        this->_state = "Downloading";
+        this->_state = Downloading;
         emit fileSizeChanged();
         emit downloadStateChanged();
 
@@ -111,7 +111,7 @@ void DownloaderPeer::wsMessage(const QString &type, const QJsonObject &json) {
         this->_timer->start();
     } else if (type == "stream_completed") {
         this->_timer->stop();
-        this->_state = "Downloaded";
+        this->_state = Downloaded;
         emit downloadStateChanged();
     }
 }

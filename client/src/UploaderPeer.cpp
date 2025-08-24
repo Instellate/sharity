@@ -2,6 +2,8 @@
 
 #include <QJsonDocument>
 #include <QtConcurrent>
+#include <exception>
+#include <stdexcept>
 #include "Websocket.h"
 
 void UploaderPeer::startRtcNegotiation() {
@@ -50,6 +52,14 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     auto promise = std::make_shared<std::promise<void>>();
     channel->setBufferedAmountLowThreshold(bufferSize * 2);
     channel->onBufferedAmountLow([promise] { promise->set_value(); });
+    channel->onClosed([promise] {
+        qDebug() << "Channel got closed. Throwing exception for uploader promise";
+        promise->set_exception(std::make_exception_ptr(std::runtime_error{"Stream cancelled"}));
+    });
+    this->_streamFuture.onCanceled([promise] {
+        qDebug() << "Stream future got cancelled. Throwing exception for uploader promise";
+        promise->set_exception(std::make_exception_ptr(std::runtime_error{"Stream cancelled"}));
+    });
 
     bool failed = false;
     try {
@@ -82,6 +92,7 @@ void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     delete[] buffer;
     channel->close();
     this->_timer->stop();
+    qDebug() << "Finished uploading file";
 }
 
 UploaderPeer::UploaderPeer(QObject *parent) : QObject(parent) {
@@ -95,7 +106,10 @@ UploaderPeer::UploaderPeer(QObject *parent) : QObject(parent) {
     this->_timer->setInterval(1s);
 }
 
-UploaderPeer::~UploaderPeer() { this->_streamFuture.cancel(); }
+UploaderPeer::~UploaderPeer() {
+    this->_streamFuture.cancel();
+    this->_streamFuture.waitForFinished();
+}
 
 qint64 UploaderPeer::amountUploaded() const { return this->_amountUploaded; }
 qint64 UploaderPeer::fileSize() const { return this->_fileSize; }

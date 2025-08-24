@@ -1,9 +1,11 @@
 #include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickWindow>
+#include <QtDebug>
 #include <QtLogging>
 #include <QtSystemDetection>
 
@@ -12,7 +14,31 @@
 #include <QStringList>
 #endif
 
-#include <rtc/rtc.hpp>
+#include <iostream>
+
+void messageHandler(QtMsgType type, const QMessageLogContext &, const QString &message) {
+    QString msgType;
+    switch (type) {
+        case QtDebugMsg:
+            msgType = "Debug";
+            break;
+        case QtInfoMsg:
+            msgType = "Info";
+            break;
+        case QtWarningMsg:
+            msgType = "Warning";
+            break;
+        case QtCriticalMsg:
+            msgType = "Critical";
+            break;
+        case QtFatalMsg:
+            msgType = "Fatal";
+            break;
+        default:
+            break;
+    }
+    std::cerr << '[' << qUtf8Printable(msgType) << "] " << qUtf8Printable(message) << '\n';
+}
 
 int main(int argc, char **argv) {
     QApplication app{argc, argv};
@@ -20,6 +46,8 @@ int main(int argc, char **argv) {
     app.setOrganizationDomain("https://instellate.xyz");
     app.setApplicationName("Sharity");
     app.setApplicationDisplayName("Sharity");
+
+    qInstallMessageHandler(messageHandler);
 
 #ifdef Q_OS_WASM
     // Loads in twemoji emojis for WASM targets
@@ -41,8 +69,18 @@ int main(int argc, char **argv) {
     }
 #endif
 
+    QIcon::setThemeName("material");
+
+    QStringList languageQmFiles = QDir{":/qt/qml/Sharity/i18n"}.entryList();
+    QStringList languages;
+    for (const QString &languageQmFile: std::as_const(languageQmFiles)) {
+        QString language = languageQmFile.sliced(4, 5);
+        languages.emplaceBack(std::move(language));
+    }
+
     QQmlApplicationEngine engine{"Sharity", "MainWindow"};
-    engine.setUiLanguage(QLocale::system().name());
+    // engine.setUiLanguage(QLocale::system().name());
+    engine.rootObjects().first()->setProperty("languages", languages);
 
     return app.exec();
 }

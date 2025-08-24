@@ -4,37 +4,42 @@
 <context>
     <name>Connect</name>
     <message>
-        <location filename="../qml/Connect.qml" line="23"/>
+        <location filename="../qml/Connect.qml" line="24"/>
         <source>WebSocket Relay</source>
         <translation>WebSocket Relä</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="34"/>
+        <location filename="../qml/Connect.qml" line="35"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="39"/>
+        <location filename="../qml/Connect.qml" line="40"/>
         <source>Uploader</source>
         <translation>Uppladdare</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="44"/>
+        <location filename="../qml/Connect.qml" line="45"/>
         <source>Downloader</source>
         <translation>Nedladdare</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="67"/>
+        <location filename="../qml/Connect.qml" line="68"/>
         <source>Copy Connection Key</source>
         <translation>Kopiera anslutnings nyckel</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="82"/>
+        <location filename="../qml/Connect.qml" line="73"/>
+        <source>Copied to clipboard</source>
+        <translation>Kopierat till urklipp</translation>
+    </message>
+    <message>
+        <location filename="../qml/Connect.qml" line="84"/>
         <source>Connection Key</source>
         <translation>Anslutnings nyckel</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="88"/>
+        <location filename="../qml/Connect.qml" line="90"/>
         <source>Connect</source>
         <translation>Anslut</translation>
     </message>
@@ -137,6 +142,14 @@
         <location filename="../qml/Sas.qml" line="74"/>
         <source>No</source>
         <translation>Nej</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPopup</name>
+    <message>
+        <location filename="../qml/SettingsPopup.qml" line="52"/>
+        <source>Language</source>
+        <translation>Språk</translation>
     </message>
 </context>
 <context>

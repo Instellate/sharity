@@ -12,6 +12,7 @@ ApplicationWindow {
     Material.accent: Material.Indigo
 
     property bool sasConfirmed: false
+    property alias languages: settings.languages
 
     Connections {
         target: WebSocket
@@ -21,6 +22,7 @@ ApplicationWindow {
     }
 
     Loader {
+        id: loader
         anchors.centerIn: parent
 
         source: {
@@ -43,5 +45,31 @@ ApplicationWindow {
                 root.sasConfirmed = Qt.binding(() => item.sasConfirmed);
             }
         }
+    }
+
+    Binding {
+        target: loader.item
+        property: "toast"
+        value: toast
+        when: loader.status == Loader.Ready && loader.item instanceof Connect
+    }
+
+    RoundButton {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+
+        flat: true
+        icon.name: "settings"
+        onClicked: settings.open()
+    }
+
+    SettingsPopup {
+        id: settings
+
+        anchors.centerIn: parent
+    }
+
+    Toast {
+        id: toast
     }
 }

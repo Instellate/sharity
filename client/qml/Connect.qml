@@ -13,6 +13,7 @@ ColumnLayout {
     }
 
     property bool isUploader: uploaderRadioButton.checked
+    property var toast
 
     TextField {
         id: websocketUrl
@@ -59,9 +60,9 @@ ColumnLayout {
     Button {
         visible: root.isUploader
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: 2 
+        Layout.topMargin: 2
         Layout.bottomMargin: 2
-        // The margins are here to prevent UI from moving 
+        // The margins are here to prevent UI from moving
         // when changing between uploader and downloader
 
         text: qsTr("Copy Connection Key")
@@ -69,6 +70,7 @@ ColumnLayout {
             connectionKey.selectAll();
             connectionKey.copy();
             connectionKey.deselect();
+            root.toast.display(qsTr("Copied to clipboard"))
         }
     }
 
@@ -90,9 +92,8 @@ ColumnLayout {
             if (root.isUploader) {
                 WebSocket.open(websocketUrl.text);
             } else {
-                WebSocket.open(websocketUrl.text, downloaderKey.text)
+                WebSocket.open(websocketUrl.text, downloaderKey.text);
             }
         }
     }
 }
-

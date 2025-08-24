@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/material/index.theme</file>
+        <file>icons/material/scalable/settings.svg</file>
+    </qresource>
+</RCC>

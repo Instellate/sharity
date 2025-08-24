@@ -17,11 +17,11 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         text: {
             switch (peer.downloadState) {
-            case "Waiting":
+            case DownloaderPeer.Waiting:
                 return qsTr("Waiting");
-            case "Downloading":
+            case DownloaderPeer.Downloading:
                 return qsTr("Downloading");
-            case "Downloaded":
+            case DownloaderPeer.Downloaded:
                 return qsTr("Downloaded");
             }
         }
@@ -29,7 +29,7 @@ ColumnLayout {
 
     Label {
         Layout.alignment: Qt.AlignHCenter
-        visible: peer.downloadState !== "Waiting"
+        visible: peer.downloadState !== DownloaderPeer.Waiting
         //: How much of the file has been downloaded out of the total amount
         text: qsTr("%1  out of %2").arg(Qt.locale().formattedDataSize(peer.amountDownloaded)).arg(Qt.locale().formattedDataSize(peer.fileSize))
         color: palette.text
@@ -37,13 +37,13 @@ ColumnLayout {
 
     ProgressBar {
         Layout.alignment: Qt.AlignHCenter
-        visible: peer.downloadState !== "Waiting"
+        visible: peer.downloadState !== DownloaderPeer.Waiting
         value: peer.amountDownloaded / peer.fileSize
     }
 
     Label {
         Layout.alignment: Qt.AlignHCenter
-        visible: peer.downloadState !== "Waiting"
+        visible: peer.downloadState !== DownloaderPeer.Waiting
         text: `${Qt.locale().formattedDataSize(peer.speed)}/s`
     }
 

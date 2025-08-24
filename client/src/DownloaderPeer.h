@@ -9,11 +9,21 @@
 
 class DownloaderPeer : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QString downloadState READ downloadState NOTIFY downloadStateChanged)
+    Q_PROPERTY(State downloadState READ downloadState NOTIFY downloadStateChanged)
     Q_PROPERTY(qint64 fileSize READ fileSize NOTIFY fileSizeChanged)
     Q_PROPERTY(qint64 amountDownloaded READ amountDownloaded NOTIFY amountDownloadedChanged)
     Q_PROPERTY(qint64 speed READ speed NOTIFY speedChanged)
     QML_ELEMENT
+
+public:
+    enum State {
+        Waiting,
+        Downloading,
+        Downloaded
+    };
+    Q_ENUM(State);
+
+private:
 
     using DataChannel = std::shared_ptr<rtc::DataChannel>;
 
@@ -23,7 +33,7 @@ class DownloaderPeer : public QObject {
     QTimer *_timer;
     QAtomicInteger<qint64> _downloadedSinceTick;
 
-    QString _state = "Waiting";
+    State _state = Waiting;
     QString _expectedLabel;
     qint64 _fileSize = 0;
     qint64 _amountDownloaded = 0;
@@ -36,7 +46,7 @@ public:
 
     ~DownloaderPeer() override;
 
-    [[nodiscard]] QString downloadState();
+    [[nodiscard]] State downloadState() const;
     [[nodiscard]] qint64 fileSize() const;
     [[nodiscard]] qint64 amountDownloaded() const;
     [[nodiscard]] qint64 speed() const;
