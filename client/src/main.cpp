@@ -9,6 +9,10 @@
 #include <QtLogging>
 #include <QtSystemDetection>
 
+#ifdef Q_OS_WIN
+#include <QSettings>
+#endif
+
 #ifdef Q_OS_WASM
 #include <QFontDatabase>
 #include <QStringList>
@@ -67,6 +71,10 @@ int main(int argc, char **argv) {
     } else {
         qWarning() << "Couldn't find the resource for the twemoji file";
     }
+#endif
+
+#ifdef Q_OS_WIN
+    QSettings::setDefaultFormat(QSettings::IniFormat);
 #endif
 
     QIcon::setThemeName("material");
