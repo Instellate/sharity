@@ -48,7 +48,7 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml LinguistTools)
 qt_standard_project_setup(
   I18N_SOURCE_LANGUAGE en_GB
-  I18N_TRANSLATED_LANGUAGES sv_SE)
+  I18N_TRANSLATED_LANGUAGES sv_SE de_DE)
 
 if (QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
