@@ -20,6 +20,7 @@ class WebSocket : public QObject {
     Q_PROPERTY(bool encrypted READ encrypted NOTIFY encryptedChanged)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
     Q_PROPERTY(bool isDownloader READ isDownloader NOTIFY isDownloaderChanged)
+    Q_PROPERTY(bool connecting READ connecting NOTIFY connectingChanged)
     QML_ELEMENT
     QML_SINGLETON
 
@@ -32,6 +33,7 @@ class WebSocket : public QObject {
     QStringList _stunServers;
     bool _established = false;
     bool _encrypted = false;
+    bool _connecting = false;
 
     vodozemac::olm::Account _account;
     std::optional<vodozemac::olm::Session> _session = std::nullopt;
@@ -67,6 +69,7 @@ public:
     [[nodiscard]] bool established() const;
     [[nodiscard]] bool connected() const;
     [[nodiscard]] bool isDownloader() const;
+    [[nodiscard]] bool connecting() const;
 
 signals:
     void stunServersChanged();
@@ -75,6 +78,7 @@ signals:
     void connectedChanged();
     void publicKeyChanged();
     void isDownloaderChanged();
+    void connectingChanged();
 
     void message(const QString &type, const QJsonObject &json);
 };

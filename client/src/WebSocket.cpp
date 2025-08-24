@@ -236,11 +236,15 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
     this->_ws.onOpen([this] {
         qInfo() << "Connected to websocket server";
         emit connectedChanged();
+        
+        this->_connecting = false;
+        emit connectingChanged();
     });
     this->_ws.onClosed([this] {
         qInfo() << "Websocket connection closed";
         this->_encrypted = false;
         this->_established = false;
+        this->_connecting = false;
         this->_publicKey = std::nullopt;
         this->_session = std::nullopt;
         this->_stunServers.clear();
@@ -249,6 +253,7 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
         emit connectedChanged();
         emit encryptedChanged();
         emit connectedChanged();
+        emit connectingChanged();
         emit stunServersChanged();
         emit isDownloaderChanged();
     });
@@ -270,6 +275,9 @@ void WebSocket::open(const QString &url, QString publicKey) {
     this->_ws.onMessage([this](auto message) { this->onMessage(std::move(message)); });
     this->_ws.open(fullUrl.toString().toStdString());
     emit isDownloaderChanged();
+    
+    this->_connecting = true;
+    emit connectingChanged();
 }
 
 void WebSocket::open(const QString &url) {
@@ -300,6 +308,9 @@ void WebSocket::open(const QString &url) {
 
     this->_ws.onMessage([this](auto message) { this->onMessage(std::move(message)); });
     this->_ws.open(fullUrl.toString().toStdString());
+
+    this->_connecting = true;
+    emit connectingChanged();
 }
 
 void WebSocket::send(const QString &message) {
@@ -324,3 +335,4 @@ bool WebSocket::encrypted() const { return this->_encrypted; }
 bool WebSocket::established() const { return this->_established; }
 bool WebSocket::connected() const { return this->_ws.isOpen(); }
 bool WebSocket::isDownloader() const { return this->_publicKey.has_value(); }
+bool WebSocket::connecting() const { return this->_connecting; }

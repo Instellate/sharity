@@ -16,4 +16,12 @@ ColumnLayout {
             return qsTr("Established and encrypted");
         }
     }
+
+    Button {
+        Layout.alignment: Qt.AlignHCenter
+
+        text: qsTr("Cancel")
+        enabled: !WebSocket.established
+        onClicked: WebSocket.close()
+    }
 }

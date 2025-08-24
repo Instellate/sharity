@@ -70,7 +70,7 @@ ColumnLayout {
             connectionKey.selectAll();
             connectionKey.copy();
             connectionKey.deselect();
-            root.toast.display(qsTr("Copied to clipboard"))
+            root.toast.display(qsTr("Copied to clipboard"));
         }
     }
 
@@ -88,6 +88,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
 
         text: qsTr("Connect")
+        enabled: !WebSocket.connecting
         onClicked: {
             if (root.isUploader) {
                 WebSocket.open(websocketUrl.text);

@@ -95,6 +95,11 @@
         <source>Established and encrypted</source>
         <translation>Etablerad och krypterat</translation>
     </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="23"/>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
 </context>
 <context>
     <name>Sas</name>

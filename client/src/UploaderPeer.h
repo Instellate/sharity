@@ -25,9 +25,9 @@ class UploaderPeer : public QObject {
     QAtomicInteger<qint64> _uploadedSinceTick;
 
     QFuture<void> _streamFuture;
-    qint64 _amountUploaded;
-    qint64 _fileSize;
-    qint64 _speed;
+    qint64 _amountUploaded = 0;
+    qint64 _fileSize = 0;
+    qint64 _speed = 0;
 
     void startRtcNegotiation();
     void handleFileUpload(const DataChannel &channel);
