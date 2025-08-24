@@ -7,22 +7,25 @@
 #include "Websocket.h"
 
 void UploaderPeer::startRtcNegotiation() {
-    rtc::Configuration config;
-    const auto stunServers = WebSocket::instance()->stunServers();
-    for (const QString &server: stunServers) {
-        config.iceServers.emplace_back(server.toStdString());
-    }
+    if (!this->_peer) {
+        rtc::Configuration config;
+        const auto stunServers = WebSocket::instance()->stunServers();
+        for (const QString &server: stunServers) {
+            config.iceServers.emplace_back(server.toStdString());
+        }
 
-    this->_peer = std::make_shared<rtc::PeerConnection>(config);
-    this->_peer->onLocalDescription([](const rtc::Description &sdp) {
-        QString offer = QString::fromStdString(sdp);
-        const QJsonObject json{{"type", "rtc_offer"}, {"offer", offer}};
-        WebSocket::instance()->send(QJsonDocument{json}.toJson());
-    });
-    this->_peer->onLocalCandidate([](const rtc::Candidate &candidate) {
-        const QJsonObject json{{"type", "rtc_candidate"}, {"candidate", QString::fromStdString(candidate)}};
-        WebSocket::instance()->send(QJsonDocument{json}.toJson());
-    });
+        this->_peer = std::make_shared<rtc::PeerConnection>(config);
+
+        this->_peer->onLocalDescription([](const rtc::Description &sdp) {
+            QString offer = QString::fromStdString(sdp);
+            const QJsonObject json{{"type", "rtc_offer"}, {"offer", offer}};
+            WebSocket::instance()->send(QJsonDocument{json}.toJson());
+        });
+        this->_peer->onLocalCandidate([](const rtc::Candidate &candidate) {
+            const QJsonObject json{{"type", "rtc_candidate"}, {"candidate", QString::fromStdString(candidate)}};
+            WebSocket::instance()->send(QJsonDocument{json}.toJson());
+        });
+    }
 
     DataChannel channel = this->_peer->createDataChannel(this->_selectedFile.fileName().toStdString());
     channel->onOpen([this, channel] {
