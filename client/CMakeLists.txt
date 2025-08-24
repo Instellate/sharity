@@ -118,7 +118,9 @@ qt_add_translations(
 
 if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
   target_compile_options(sharity-client PUBLIC "/Zc:__cplusplus")
-  target_compile_options(sharity-client PRIVATE /W4 /WX)
+  target_compile_options(sharity-client PRIVATE /W4) 
+  # MSVC warnings is weirder and triggers in more weird places.
+  # I trust Linux compilers to do a better job on this
 else ()
   target_compile_options(sharity-client PRIVATE -Wall -Wextra -Werror
                                                 -Wno-language-extension-token)
