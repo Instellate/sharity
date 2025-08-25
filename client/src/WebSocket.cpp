@@ -10,6 +10,7 @@
 #include <qrandom.h>
 #include <string>
 #include <variant>
+#include "vodozemac.h"
 
 void WebSocket::sendEncrypted(const QString &message) {
     auto bytes = this->_session->encrypt(message.toStdString()).bytes;
@@ -236,7 +237,7 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
     this->_ws.onOpen([this] {
         qInfo() << "Connected to websocket server";
         emit connectedChanged();
-        
+
         this->_connecting = false;
         emit connectingChanged();
     });
@@ -262,7 +263,7 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
 WebSocket *WebSocket::instance() { return singletonInstance; }
 
 void WebSocket::open(const QString &url, QString publicKey) {
-    const QString pubKeyCopy = publicKey;
+    const QString pubKeyCopy = publicKey.trimmed();
     publicKey.replace('+', '-').replace('/', '_');
     QUrlQuery query{};
     query.addQueryItem("key", publicKey);
@@ -275,7 +276,7 @@ void WebSocket::open(const QString &url, QString publicKey) {
     this->_ws.onMessage([this](auto message) { this->onMessage(std::move(message)); });
     this->_ws.open(fullUrl.toString().toStdString());
     emit isDownloaderChanged();
-    
+
     this->_connecting = true;
     emit connectingChanged();
 }
@@ -322,6 +323,17 @@ void WebSocket::send(const QString &message) {
 }
 
 void WebSocket::close() { this->_ws.close(); }
+
+bool WebSocket::isValidKey(const QString &key) {
+    const std::string stdKey = key.trimmed().toStdString();
+
+    try {
+        vodozemac::Ed25519PublicKey::fromBase64(stdKey);
+        return true;
+    } catch (const std::exception &) {
+        return false;
+    }
+}
 
 QStringList WebSocket::stunServers() const { return this->_stunServers; }
 

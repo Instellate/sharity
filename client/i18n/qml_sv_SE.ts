@@ -34,12 +34,18 @@
         <translation>Kopierat till urklipp</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="84"/>
+        <location filename="../qml/Connect.qml" line="87"/>
+        <location filename="../qml/Connect.qml" line="105"/>
+        <source>The key is invalid</source>
+        <translation>Nyckeln är ogiltig</translation>
+    </message>
+    <message>
+        <location filename="../qml/Connect.qml" line="90"/>
         <source>Connection Key</source>
         <translation>Anslutnings nyckel</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="90"/>
+        <location filename="../qml/Connect.qml" line="96"/>
         <source>Connect</source>
         <translation>Anslut</translation>
     </message>
@@ -124,12 +130,12 @@
         <translation>Båda bekräftade samma SAS</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="39"/>
+        <location filename="../qml/Sas.qml" line="51"/>
         <source>Numbers</source>
         <translation>Nummer</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="39"/>
+        <location filename="../qml/Sas.qml" line="51"/>
         <source>Emojis</source>
         <translation>Emojis</translation>
     </message>

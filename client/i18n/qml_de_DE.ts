@@ -34,12 +34,18 @@
         <translation>In Zwischenablage kopiert</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="84"/>
+        <location filename="../qml/Connect.qml" line="87"/>
+        <location filename="../qml/Connect.qml" line="105"/>
+        <source>The key is invalid</source>
+        <translation>Der Schlüssel ist ungültig</translation>
+    </message>
+    <message>
+        <location filename="../qml/Connect.qml" line="90"/>
         <source>Connection Key</source>
         <translation>Verbindungsschlüssel</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="90"/>
+        <location filename="../qml/Connect.qml" line="96"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
@@ -124,12 +130,12 @@
         <translation>Beide haben gleichen sas bestätigt</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="39"/>
+        <location filename="../qml/Sas.qml" line="51"/>
         <source>Numbers</source>
         <translation>Zahlen</translation>
     </message>
     <message>
-        <location filename="../qml/Sas.qml" line="39"/>
+        <location filename="../qml/Sas.qml" line="51"/>
         <source>Emojis</source>
         <translation>Emojis</translation>
     </message>

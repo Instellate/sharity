@@ -63,6 +63,8 @@ public:
     Q_INVOKABLE void send(const QString &message);
     Q_INVOKABLE void close();
 
+    Q_INVOKABLE static bool isValidKey(const QString &key) ;
+
     [[nodiscard]] QStringList stunServers() const;
     [[nodiscard]] QString publicKey() const;
     [[nodiscard]] bool encrypted() const;

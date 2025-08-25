@@ -80,7 +80,13 @@ ColumnLayout {
         Layout.preferredWidth: 192
         Layout.alignment: Qt.AlignHCenter
 
-        onAccepted: WebSocket.open(websocketUrl.text, text)
+        onAccepted: {
+            if (WebSocket.isValidKey(text)) {
+                WebSocket.open(websocketUrl.text, text);
+            } else {
+                root.toast.display(qsTr("The key is invalid"));
+            }
+        }
         placeholderText: qsTr("Connection Key")
     }
 
@@ -93,7 +99,11 @@ ColumnLayout {
             if (root.isUploader) {
                 WebSocket.open(websocketUrl.text);
             } else {
-                WebSocket.open(websocketUrl.text, downloaderKey.text);
+                if (WebSocket.isValidKey(text)) {
+                    WebSocket.open(websocketUrl.text, downloaderKey.text);
+                } else {
+                    root.toast.display(qsTr("The key is invalid"));
+                }
             }
         }
     }

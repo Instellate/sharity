@@ -32,14 +32,6 @@ ColumnLayout {
         }
     }
 
-    Button {
-        Layout.alignment: Qt.AlignHCenter
-
-        visible: root.displaySas
-        text: root.displayEmojis ? qsTr("Numbers") : qsTr("Emojis")
-        onClicked: root.displayEmojis = !root.displayEmojis
-    }
-
     Loader {
         active: root.displaySas
         Layout.alignment: Qt.AlignHCenter
@@ -50,6 +42,14 @@ ColumnLayout {
             font.pointSize: 16
             text: root.displayEmojis ? sas.emojis : sas.decimals
         }
+    }
+
+    Button {
+        Layout.alignment: Qt.AlignHCenter
+
+        visible: root.displaySas
+        text: root.displayEmojis ? qsTr("Numbers") : qsTr("Emojis")
+        onClicked: root.displayEmojis = !root.displayEmojis
     }
 
     Label {
