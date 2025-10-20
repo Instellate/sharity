@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <qrandom.h>
 
-#include "Websocket.h"
+#include "WebSocket.h"
 
 static QStringList emojiTable{"🐶", "🐱", "🦁", "🐎", "🦄", "🐷", "🐘", "🐰", "🐼", "🐓", "🐧", "🐢", "🐟",
                               "🐙", "🦋", "🌷", "🌳", "🌵", "🍄", "🌏", "🌙", "☁",  "🔥", "🍌", "🍎", "🍓",

@@ -1,4 +1,4 @@
-#include "Websocket.h"
+#include "WebSocket.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>

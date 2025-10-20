@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-#include "Websocket.h"
+#include "WebSocket.h"
 
 void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
     qDebug() << "Got data channel" << channel->label();

@@ -107,7 +107,7 @@ qt_add_qml_module(sharity-client
   OUTPUT_DIRECTORY qmlGen
   RESOURCE_PREFIX /qt/qml
   QML_FILES ${QML_FILES}
-  SOURCES src/Websocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h)
+  SOURCES src/WebSocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h)
 
 qt_add_translations(
   sharity-client

@@ -2,9 +2,11 @@
 
 #include <QJsonDocument>
 #include <QtConcurrent>
+
 #include <exception>
 #include <stdexcept>
-#include "Websocket.h"
+
+#include "WebSocket.h"
 
 void UploaderPeer::startRtcNegotiation() {
     if (!this->_peer) {
