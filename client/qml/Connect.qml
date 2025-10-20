@@ -99,7 +99,7 @@ ColumnLayout {
             if (root.isUploader) {
                 WebSocket.open(websocketUrl.text);
             } else {
-                if (WebSocket.isValidKey(text)) {
+                if (WebSocket.isValidKey(downloaderKey.text)) {
                     WebSocket.open(websocketUrl.text, downloaderKey.text);
                 } else {
                     root.toast.display(qsTr("The key is invalid"));
