@@ -8,6 +8,8 @@
 #include <QStandardPaths>
 #include <QtLogging>
 
+#include <stdexcept>
+
 #include "Websocket.h"
 
 void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
@@ -15,11 +17,13 @@ void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
     const QDir downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     auto file = QSharedPointer<QFile>::create(downloadPath.filePath(QString::fromStdString(channel->label())));
 
-    file->open(QIODeviceBase::WriteOnly, QFileDevice::ReadUser | QFileDevice::WriteUser);
+    if (!file->open(QIODeviceBase::WriteOnly, QFileDevice::ReadUser | QFileDevice::WriteUser)) {
+        throw std::runtime_error{"Cannot open file " + channel->label()};
+    }
 
     channel->onClosed([this, channel] {
         qInfo() << "Data channel " << channel->label() << "got closed";
-        std::erase(this->_channels, channel); 
+        std::erase(this->_channels, channel);
     });
     channel->onMessage([this, file](const std::variant<rtc::binary, rtc::string> &message) {
         if (std::holds_alternative<rtc::string>(message)) {

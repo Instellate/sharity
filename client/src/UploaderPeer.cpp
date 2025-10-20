@@ -9,6 +9,7 @@
 void UploaderPeer::startRtcNegotiation() {
     if (!this->_peer) {
         rtc::Configuration config;
+
         const auto stunServers = WebSocket::instance()->stunServers();
         for (const QString &server: stunServers) {
             config.iceServers.emplace_back(server.toStdString());
@@ -43,8 +44,12 @@ void UploaderPeer::startRtcNegotiation() {
 void UploaderPeer::handleFileUpload(const DataChannel &channel) {
     const QString localFile = this->_selectedFile.toLocalFile();
     qDebug() << "Starting file upload for file:" << localFile;
+
     QFile file{localFile};
-    file.open(QIODeviceBase::ReadOnly);
+    if (!file.open(QIODeviceBase::ReadOnly)) {
+        qWarning() << "Cannot open file:" << localFile;
+        return;
+    }
 
     this->_fileSize = file.size();
     emit fileSizeChanged();

@@ -3,8 +3,8 @@
 #include <QFile>
 #include <QJsonObject>
 #include <QObject>
+#include <QTimer>
 #include <qqmlintegration.h>
-#include <qtimer.h>
 #include <rtc/rtc.hpp>
 
 class DownloaderPeer : public QObject {
@@ -24,7 +24,6 @@ public:
     Q_ENUM(State);
 
 private:
-
     using DataChannel = std::shared_ptr<rtc::DataChannel>;
 
     std::shared_ptr<rtc::PeerConnection> _peer;

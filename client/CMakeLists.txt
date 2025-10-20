@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.14)
 project(sharity-client VERSION 0.1.0)
 
 option(CONFIGURE_NSIS "Configures CPack for NSIS installer packaging" OFF)
