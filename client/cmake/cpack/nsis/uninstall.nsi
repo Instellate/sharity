@@ -1,3 +1,2 @@
-DetailPrint "Removing custom URL"
-DeleteRegKey HKCR "sharity"
-
+DetailPrint "Deregistering Sharity URL"
+DeleteRegKey HKCR "Sharity"

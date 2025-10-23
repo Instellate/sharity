@@ -21,8 +21,13 @@ if (CONFIGURE_NSIS)
 
     # Files with extra commands
     # Handles such things as URL scheme registration
-    file(STRINGS "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/install.nsi" CPACK_NSIS_EXTRA_INSTALL_COMMANDS)
-    file(STRINGS "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/uninstall.nsi" CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS)
+    file(READ "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/install.nsi" INSTALL_COMMANDS)
+    string(REPLACE "\\" "\\\\" INSTALL_COMMANDS "${INSTALL_COMMANDS}")
+    string(REPLACE "\"" "\\\"" CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${INSTALL_COMMANDS}")
+    
+    file(READ "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/uninstall.nsi" UNINSTALL_COMMANDS)
+    string(REPLACE "\\" "\\\\" UNINSTALL_COMMANDS "${UNINSTALL_COMMANDS}")
+    string(REPLACE "\"" "\\\"" CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${UNINSTALL_COMMANDS}")
 endif ()
 
 qt_generate_deploy_qml_app_script(
