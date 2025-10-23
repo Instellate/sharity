@@ -16,20 +16,6 @@ if (WIN32)
         LIBRARY DESTINATION bin)
 endif ()
 
-if (CONFIGURE_NSIS)
-    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-
-    # Files with extra commands
-    # Handles such things as URL scheme registration
-    file(READ "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/install.nsi" INSTALL_COMMANDS)
-    string(REPLACE "\\" "\\\\" INSTALL_COMMANDS "${INSTALL_COMMANDS}")
-    string(REPLACE "\"" "\\\"" CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${INSTALL_COMMANDS}")
-    
-    file(READ "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/uninstall.nsi" UNINSTALL_COMMANDS)
-    string(REPLACE "\\" "\\\\" UNINSTALL_COMMANDS "${UNINSTALL_COMMANDS}")
-    string(REPLACE "\"" "\\\"" CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${UNINSTALL_COMMANDS}")
-endif ()
-
 qt_generate_deploy_qml_app_script(
     TARGET sharity-client
     OUTPUT_SCRIPT DEPLOY_SCRIPT)

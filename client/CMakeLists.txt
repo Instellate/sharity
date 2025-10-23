@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 project(sharity-client VERSION 0.1.0)
 
 option(CONFIGURE_NSIS "Configures CPack for NSIS installer packaging" OFF)
-option(CONFIGURE_WIX "COnfigures CPack for msi installer packaging" OFF)
+option(CONFIGURE_WIX "Configures CPack for MSI installer packaging" OFF)
+option(CONFIGURE_BUNDLE "Configures CPack for MacOS bundle installer packaging" OFF)
 
 include(FetchContent)
 
@@ -133,10 +134,26 @@ endif ()
 if (WIN32 AND CONFIGURE_NSIS)
   message(STATUS "Configuring NSIS Generator")
   set(CPACK_GENERATOR NSIS)
+  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+
+  # Files with extra commands
+  # Handles such things as URL scheme registration
+  file(READ "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/install.nsi" INSTALL_COMMANDS)
+  string(REPLACE "\\" "\\\\" INSTALL_COMMANDS "${INSTALL_COMMANDS}")
+  string(REPLACE "\"" "\\\"" CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${INSTALL_COMMANDS}")
+
+  file(READ "${CMAKE_SOURCE_DIR}/cmake/cpack/nsis/uninstall.nsi" UNINSTALL_COMMANDS)
+  string(REPLACE "\\" "\\\\" UNINSTALL_COMMANDS "${UNINSTALL_COMMANDS}")
+  string(REPLACE "\"" "\\\"" CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${UNINSTALL_COMMANDS}")
 elseif (WIN32 AND CONFIGURE_WIX)
   message(STATUS "Configuring WIX Generator")
   set(CPACK_GENERATOR WIX)
   set(CPACK_WIX_VERSION 4)
+elseif (APPLE AND CONFIGURE_BUNDLE)
+    message(STATUS "Configuring Bundle Generator")
+    set(CPACK_BUNDLE_NAME "Sharity")
+    set(CPACK_BUNDLE_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack/bundle/Info.plist")
+    set(CPACK_BUNDLE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack/bundle/sharity.icns")
 endif ()
 
 if (DEFINED CPACK_GENERATOR)
