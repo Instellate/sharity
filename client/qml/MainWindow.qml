@@ -13,6 +13,7 @@ ApplicationWindow {
 
     property bool sasConfirmed: false
     property alias languages: settings.languages
+    property var connectUrl: null
 
     Connections {
         target: WebSocket
@@ -51,7 +52,7 @@ ApplicationWindow {
         target: loader.item
         property: "toast"
         value: toast
-        when: loader.status == Loader.Ready && loader.item instanceof Connect
+        when: loader.status == Loader.Ready && (loader.item instanceof Connect || loader.item instanceof HandshakeStatus)
     }
 
     RoundButton {
@@ -71,5 +72,27 @@ ApplicationWindow {
 
     Toast {
         id: toast
+    }
+
+    onConnectUrlChanged: {
+        if (root.connectUrl === null) {
+            return;
+        }
+        const url = new URL(decodeURI(root.connectUrl));
+
+        let host;
+        if (url.protocol === "usharity:") {
+            host = `ws://${url.host}`;
+        } else {
+            host = `wss://${url.host}`;
+        }
+
+        if (url.searchParams.has("path")) {
+            host += decodeURIComponent(url.searchParams.get("path"));
+        }
+
+        console.log(decodeURIComponent(url.searchParams.get("key")));
+        WebSocket.open(host, decodeURIComponent(url.searchParams.get("key")));
+        root.connectUrl = null;
     }
 }

@@ -87,22 +87,38 @@
 <context>
     <name>HandshakeStatus</name>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="11"/>
+        <location filename="../qml/HandshakeStatus.qml" line="20"/>
         <source>Waiting to be etablished</source>
         <translation>Verbindung wird aufgebaut</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="13"/>
+        <location filename="../qml/HandshakeStatus.qml" line="22"/>
         <source>Waiting for handshake to finish</source>
         <translation>Warte auf Abschluss des Handshakes</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="16"/>
+        <location filename="../qml/HandshakeStatus.qml" line="25"/>
         <source>Established and encrypted</source>
         <translation>Verbindung hergestellt und verschlüsselt</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="23"/>
+        <location filename="../qml/HandshakeStatus.qml" line="44"/>
+        <source>Copy Connection Key</source>
+        <translation>Verbindungsschlüssel kopieren</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="49"/>
+        <location filename="../qml/HandshakeStatus.qml" line="75"/>
+        <source>Copied to clipboard</source>
+        <translation>In Zwischenablage kopiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="57"/>
+        <source>Copy Download URL</source>
+        <translation>Kopieren Herunterladen URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="82"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
