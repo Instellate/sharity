@@ -49,6 +49,14 @@ Popup {
 
     ColumnLayout {
         Label {
+            text: "Settings"
+            font.pointSize: 12
+            font.bold: true
+
+            Layout.bottomMargin: 4
+        }
+
+        Label {
             text: qsTr("Language")
         }
 

@@ -87,22 +87,38 @@
 <context>
     <name>HandshakeStatus</name>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="11"/>
+        <location filename="../qml/HandshakeStatus.qml" line="20"/>
         <source>Waiting to be etablished</source>
         <translation>Väntar på att bli etablerad</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="13"/>
+        <location filename="../qml/HandshakeStatus.qml" line="22"/>
         <source>Waiting for handshake to finish</source>
         <translation>Väntar på handskakning</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="16"/>
+        <location filename="../qml/HandshakeStatus.qml" line="25"/>
         <source>Established and encrypted</source>
         <translation>Etablerad och krypterat</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="23"/>
+        <location filename="../qml/HandshakeStatus.qml" line="44"/>
+        <source>Copy Connection Key</source>
+        <translation>Kopiera anslutnings nyckel</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="49"/>
+        <location filename="../qml/HandshakeStatus.qml" line="75"/>
+        <source>Copied to clipboard</source>
+        <translation>Kopierat till urklipp</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="57"/>
+        <source>Copy Download URL</source>
+        <translation>Kopiera Nedladdnings URL</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="82"/>
         <source>Cancel</source>
         <translation>Avbryt</translation>
     </message>

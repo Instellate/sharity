@@ -88,7 +88,14 @@ int main(int argc, char **argv) {
 
     QQmlApplicationEngine engine{"Sharity", "MainWindow"};
     // engine.setUiLanguage(QLocale::system().name());
-    engine.rootObjects().first()->setProperty("languages", languages);
+
+    QObject *main = engine.rootObjects().first();
+    main->setProperty("languages", languages);
+    if (argc > 1) {
+        const QUrl url{argv[1]};
+        qDebug() << "Got url" << url;
+        main->setProperty("connectUrl", url);
+    }
 
     return app.exec();
 }
