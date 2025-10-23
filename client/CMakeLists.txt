@@ -63,7 +63,7 @@ if (EMSCRIPTEN)
 endif ()
 qt_add_resources(SHARITY_RESOURCES ${RESOURCE_FILES})
 
-qt_add_executable(sharity-client 
+qt_add_executable(sharity-client
         src/main.cpp
         src/WebSocket.cpp
         src/SasVerification.cpp
@@ -119,7 +119,7 @@ qt_add_translations(
 
 if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
   target_compile_options(sharity-client PUBLIC "/Zc:__cplusplus")
-  target_compile_options(sharity-client PRIVATE /W4) 
+  target_compile_options(sharity-client PRIVATE /W4)
   # MSVC warnings is weirder and triggers in more weird places.
   # I trust Linux compilers to do a better job on this
 else ()
@@ -152,9 +152,13 @@ elseif (WIN32 AND CONFIGURE_WIX)
 elseif (APPLE AND CONFIGURE_BUNDLE)
   message(STATUS "Configuring Bundle Generator")
   set_target_properties(sharity-client PROPERTIES MACOSX_BUNDLE TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/bundle/sharity.icns"
+                              MACOSX_PACKAGE_LOCATION "Resources")
+
   set(MACOSX_BUNDLE_BUNDLE_NAME "Sharity")
   set(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
-  set(MACOSX_BUNDLE_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack/bundle/sharity.icns")
+  set(MACOSX_BUNDLE_ICON_FILE "sharity.icns")
+
 endif ()
 
 if (DEFINED CPACK_GENERATOR)
