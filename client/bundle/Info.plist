@@ -5,7 +5,7 @@
 	<key>CFBundleExecutable</key>
 	<string>sharity-client</string>
 	<key>CFBundleIconFile</key>
-	<string>icon.icns</string>
+	<string>sharity.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>xyz.instellate.sharity</string>
 	<key>NSHighResolutionCapable</key>

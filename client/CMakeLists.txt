@@ -154,11 +154,7 @@ elseif (APPLE AND CONFIGURE_BUNDLE)
   set_target_properties(sharity-client PROPERTIES MACOSX_BUNDLE TRUE)
   set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/bundle/sharity.icns"
                               MACOSX_PACKAGE_LOCATION "Resources")
-
-  set(MACOSX_BUNDLE_BUNDLE_NAME "Sharity")
-  set(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
-  set(MACOSX_BUNDLE_ICON_FILE "sharity.icns")
-
+  set(MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/bundle/Info.plist")
 endif ()
 
 if (DEFINED CPACK_GENERATOR)
