@@ -26,12 +26,11 @@ jobs:
         with:
           version: 4.1.0
 
-      - uses: winpax/scoop-setup@v1.0.0
-        name: Install NSIS
-        with:
-          buckets: extras main
-          apps: nsis openssl
-
+      - name: Install OpenSSL
+        working-directory: ${{ runner.workspace }}
+        run: |
+          curl.exe -O https://slproweb.com/download/Win64OpenSSL_Light-3_6_0.msi
+          msiexec /package Win64OpenSSL_Light-3_6_0.msi /quiet
 
       - name: Restore Cache LibDataChannel
         id: cache-libdatachannel-restore
@@ -64,6 +63,12 @@ jobs:
         run: |
           cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
+
+      - uses: winpax/scoop-setup@v1.0.0
+        name: Install NSIS
+        with:
+          buckets: extras
+          apps: nsis
 
       - name: Package NSIS
         working-directory: ${{ github.workspace }}/client/build
