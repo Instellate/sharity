@@ -7,7 +7,7 @@ on:
 jobs:
   build-windows:
     name: Build and Package for Windows
-    runs-on: windows-2022
+    runs-on: windows-2025
     if: "!contains(format('{0} {1}', github.event.head_commit.message, github.event.pull_request.title), '[ci-skip]')"
 
     steps:
@@ -25,6 +25,13 @@ jobs:
         uses: ssrobins/install-cmake@v1
         with:
           version: 4.1.0
+
+      - uses: winpax/scoop-setup@v1.0.0
+        name: Install NSIS
+        with:
+          buckets: extras main
+          apps: nsis openssl
+
 
       - name: Restore Cache LibDataChannel
         id: cache-libdatachannel-restore
@@ -57,12 +64,6 @@ jobs:
         run: |
           cmake -B build  -G "Visual Studio 17 2022" -DQt6_DIR="C:\Qt\6.9.1\msvc2022_64" -DCONFIGURE_NSIS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
-
-      - uses: winpax/scoop-setup@v1.0.0
-        name: Install NSIS
-        with:
-          buckets: extras
-          apps: nsis
 
       - name: Package NSIS
         working-directory: ${{ github.workspace }}/client/build
