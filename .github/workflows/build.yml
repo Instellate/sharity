@@ -26,22 +26,22 @@ jobs:
         with:
           version: 4.1.0
 
-#      - name: Restore Cache LibDataChannel
-#        id: cache-libdatachannel-restore
-#        uses: actions/cache/restore@v4
-#        with:
-#          path: 'C:/Program Files (x86)/libdatachannel'
-#          key: ${{ runner.os }}-libdatachannel
+      - name: Restore Cache LibDataChannel
+        id: cache-libdatachannel-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: 'C:/Program Files (x86)/libdatachannel'
+          key: ${{ runner.os }}-libdatachannel
 
       - name: Build LibDataChannel
         working-directory: ${{ runner.workspace }}
-        # if: steps.cache-libdatachannel-restore.outputs.cache-hit != 'true'
+        if: steps.cache-libdatachannel-restore.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/paullouisageneau/libdatachannel.git
           cd libdatachannel
           git checkout v0.24.1
           git submodule update --init --recursive --depth 1
-          cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DNO_EXAMPLES=ON
+          cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DNO_EXAMPLES=ON
           cmake --build build --config Release
           cmake --install build
 
