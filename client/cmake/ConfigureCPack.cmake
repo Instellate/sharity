@@ -4,19 +4,18 @@ include(InstallRequiredSystemLibraries)
 
 if (WIN32)
     # For Windows, installs LibDataChannel and all its dependencies
-    find_package(OpenSSL COMPONENTS Crypto SSL REQUIRED)
-
     install(
             IMPORTED_RUNTIME_ARTIFACTS LibDataChannel::LibDataChannel OpenSSL::Crypto OpenSSL::SSL
+            RUNTIME_DEPENDENCIES
             RUNTIME_DEPENDENCY_SET DATACHANNEL_SET
             LIBRARY DESTINATION bin)
 
-    # This currently breaks the GitHub Action
-    #    install(
-    #        RUNTIME_DEPENDENCY_SET DATACHANNEL_SET
-    #        PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" "hvsifiletrust" "C:/msys64/mingw64/bin.*" ".*/msys64/mingw64/bin.*"
-    #        POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" ".*/msys64/mingw64/bin.*"
-    #        LIBRARY DESTINATION bin)
+    install(
+        RUNTIME_DEPENDENCY_SET DATACHANNEL_SET
+        PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" "hvsifiletrust" "C:/msys64/mingw64/bin.*" ".*/msys64/mingw64/bin.*"
+        POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" ".*/msys64/mingw64/bin.*"
+        POST_INCLUDE_FILES "C:/windows/system32/libssl-3-x64.dll" "C:/windows/system32/libcrypto-3-x64.dll" # There should be a better way than to force include OpenSSL
+        LIBRARY DESTINATION bin)
 endif ()
 
 qt_generate_deploy_qml_app_script(
