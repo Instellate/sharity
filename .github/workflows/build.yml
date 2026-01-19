@@ -23,6 +23,8 @@ jobs:
 
       - name: Install CMake
         uses: ssrobins/install-cmake@v1
+        with:
+          version: 4.1.0
 
       - name: Restore Cache LibDataChannel
         id: cache-libdatachannel-restore
