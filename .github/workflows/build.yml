@@ -23,9 +23,9 @@ jobs:
       - name: Install CMake
         uses: ssrobins/install-cmake@v1
 
-      - name: Cache LibDataChannel
-        id: cache-libdatachannel
-        uses: actions/cache@v4
+      - name: Restore Cache LibDataChannel
+        id: cache-libdatachannel-restore
+        uses: actions/cache/restore@v4
         with:
           path: 'C:/Program Files (x86)/libdatachannel'
           key: ${{ runner.os }}-libdatachannel
@@ -61,13 +61,26 @@ jobs:
           buckets: extras
           apps: nsis
 
-      - name: Pacakge NSIS
+      - name: Get OpenSSL location
+        run: |
+          where libcrypto-3-x64.dll
+          where libssl-3-x64.dll
+
+      - name: Package NSIS
         working-directory: ${{ github.workspace }}/client/build
         run: cpack .
 
       - uses: actions/upload-artifact@v4
         with:
           path: ${{ github.workspace }}/client/build/Sharity-*-win64.exe
+
+      - name: Save Cache LibDataChannel
+        id: cache-libdatachannel-save
+        uses: actions/cache/save@v4
+        if: always() && steps.cache-libdatachannel-restore.outputs.cache-hit != 'true'
+        with:
+          path: 'C:/Program Files (x86)/libdatachannel'
+          key: ${{ runner.os }}-libdatachannel
 
   build-linux:
     name: Build Linux

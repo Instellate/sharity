@@ -12,6 +12,7 @@ if (WIN32)
         RUNTIME_DEPENDENCY_SET DATACHANNEL_SET
         PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" "hvsifiletrust" "C:/msys64/mingw64/bin.*" ".*/msys64/mingw64/bin.*"
         POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" ".*/msys64/mingw64/bin.*"
+        POST_INCLUDE_FILES "C:/windows/system32/libssl-3-x64.dll" "C:/windows/system32/libcrypto-3-x64.dll" # There should be a better way than to force include OpenSSL
         LIBRARY DESTINATION bin)
 endif ()
 
