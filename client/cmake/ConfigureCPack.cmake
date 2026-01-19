@@ -5,7 +5,7 @@ include(InstallRequiredSystemLibraries)
 if (WIN32)
     # For Windows, installs LibDataChannel and all its dependencies
     install(
-            IMPORTED_RUNTIME_ARTIFACTS LibDataChannel::LibDataChannel OpenSSL::Crypto OpenSSL::SSL
+            IMPORTED_RUNTIME_ARTIFACTS LibDataChannel::LibDataChannel
             RUNTIME_DEPENDENCIES
             RUNTIME_DEPENDENCY_SET DATACHANNEL_SET
             LIBRARY DESTINATION bin)
