@@ -45,10 +45,6 @@ jobs:
           cmake --build build --config Release
           cmake --install build
 
-      - name: Add OpenSSL to path
-        shell: bash
-        run: echo "C:\\Program Files\\OpenSSL\\bin" >> $GITHUB_PATH
-
       - uses: dtolnay/rust-toolchain@stable
         name: Install Rust
 
