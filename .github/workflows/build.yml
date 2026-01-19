@@ -19,6 +19,7 @@ jobs:
           version: '6.9.1'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
+          cache: 'true'
 
       - name: Install CMake
         uses: ssrobins/install-cmake@v1
@@ -62,6 +63,7 @@ jobs:
           apps: nsis
 
       - name: Get OpenSSL location
+        shell: bash
         run: |
           where libcrypto-3-x64.dll
           where libssl-3-x64.dll
