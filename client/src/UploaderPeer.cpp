@@ -132,7 +132,11 @@ void UploaderPeer::setSelectedFile(const QUrl &url) {
 }
 
 void UploaderPeer::startFileNegotiation() const {
+#ifdef Q_OS_ANDROID
+    const QFile file{this->_selectedFile.toString()};
+#else
     const QFile file{this->_selectedFile.toLocalFile()};
+#endif
 
     qDebug() << "Starting file negotiation for file" << this->_selectedFile.fileName();
     const QJsonObject json{{"type", "stream_request"}, {"stream_type", "upload"}, {"size", file.size()}};
