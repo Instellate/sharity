@@ -13,13 +13,15 @@
 #include <qqmlintegration.h>
 
 #ifdef Q_OS_ANDROID
+#include <certificate.h>
 #endif
 
 inline rtc::WebSocket::Configuration getWebsocketConfig() {
     rtc::WebSocket::Configuration config{};
 #ifdef Q_OS_ANDROID
-    config.disableTlsVerification = true;
+    config.caCertificatePemFile = getCaCertificate().toStdString();
 #endif
+
     return config;
 }
 
@@ -74,7 +76,7 @@ public:
     Q_INVOKABLE void send(const QString &message);
     Q_INVOKABLE void close();
 
-    Q_INVOKABLE static bool isValidKey(const QString &key) ;
+    Q_INVOKABLE static bool isValidKey(const QString &key);
 
     [[nodiscard]] QStringList stunServers() const;
     [[nodiscard]] QString publicKey() const;

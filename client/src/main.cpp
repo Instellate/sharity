@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
-#include <QQmlEngine>
 #include <QQuickWindow>
 #include <QtDebug>
 #include <QtLogging>

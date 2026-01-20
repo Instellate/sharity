@@ -60,7 +60,7 @@ if (QT_KNOWN_POLICY_QTP0002)
 endif()
 
 
-set(RESOURCE_FILES icons.qrc)
+set(RESOURCE_FILES resources.qrc)
 if (EMSCRIPTEN)
   message(STATUS "Adding twemoji resources")
   list(APPEND RESOURCE_FILES fonts.qrc)
@@ -73,7 +73,8 @@ qt_add_executable(sharity-client
         src/SasVerification.cpp
         src/DownloaderPeer.cpp
         src/UploaderPeer.cpp
-        ${SHARITY_RESOURCES})
+        ${SHARITY_RESOURCES}
+        src/certificate.cpp)
 target_link_libraries(
   sharity-client
   PRIVATE Qt6::Core

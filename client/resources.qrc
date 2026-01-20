@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>icons/material/index.theme</file>
         <file>icons/material/scalable/settings.svg</file>
+        <file>resources/cacert.pem</file>
     </qresource>
 </RCC>
