@@ -12,6 +12,17 @@
 #include <QStringList>
 #include <qqmlintegration.h>
 
+#ifdef Q_OS_ANDROID
+#endif
+
+inline rtc::WebSocket::Configuration getWebsocketConfig() {
+    rtc::WebSocket::Configuration config{};
+#ifdef Q_OS_ANDROID
+    config.disableTlsVerification = true;
+#endif
+    return config;
+}
+
 class WebSocket : public QObject {
     Q_OBJECT
     Q_PROPERTY(QStringList stunServers READ stunServers NOTIFY stunServersChanged)
@@ -29,7 +40,7 @@ class WebSocket : public QObject {
     // If this isn't nullopt the WebSocket is a downloader
     // If this is nullopt the webSocket is an uploader
     std::optional<vodozemac::Ed25519PublicKey> _publicKey = std::nullopt;
-    rtc::WebSocket _ws;
+    rtc::WebSocket _ws{getWebsocketConfig()};
     QStringList _stunServers;
     bool _established = false;
     bool _encrypted = false;

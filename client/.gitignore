@@ -1,6 +1,6 @@
 # Build
 build
-build-wasm
+build-*
 cmake-build-*
 fonts
 

@@ -28,7 +28,7 @@ endif ()
 FetchContent_Declare(
   Corrosion
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-  GIT_TAG v0.5)
+  GIT_TAG v0.6.1)
 FetchContent_MakeAvailable(Corrosion)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -55,6 +55,10 @@ if (QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
 endif ()
 
+if (QT_KNOWN_POLICY_QTP0002)
+  qt_policy(SET QTP0002 NEW)
+endif()
+
 
 set(RESOURCE_FILES icons.qrc)
 if (EMSCRIPTEN)
@@ -80,6 +84,12 @@ target_link_libraries(
           Qt6::Qml
           vodozemac
           ${LIBDATACHANNEL})
+
+set_target_properties(sharity-client PROPERTIES
+  QT_ANDROID_APP_NAME "Sharity"
+  QT_ANDROID_APP_ICON "@mipmap/ic_launcher"
+  QT_ANDROID_PACKAGE_NAME "xyz.instellate.sharity"
+  QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android")
 
 if (WIN32)
  target_link_libraries(sharity-client PRIVATE bcrypt)
@@ -154,7 +164,8 @@ elseif (APPLE AND CONFIGURE_BUNDLE)
   set_target_properties(sharity-client PROPERTIES MACOSX_BUNDLE TRUE)
   set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/bundle/sharity.icns"
                               MACOSX_PACKAGE_LOCATION "Resources")
-  set(MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/bundle/Info.plist")
+  set_target_properties(sharity-client PROPERTIES
+    PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/bundle/Info.plist")
 endif ()
 
 if (DEFINED CPACK_GENERATOR)
