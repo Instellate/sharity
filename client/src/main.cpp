@@ -8,6 +8,7 @@
 #include <QtDebug>
 #include <QtLogging>
 #include <QtSystemDetection>
+#include <rtc/global.hpp>
 
 #ifdef Q_OS_WIN
 #include <QSettings>
@@ -19,6 +20,8 @@
 #endif
 
 #include <iostream>
+
+void logCallback(rtc::LogLevel level, std::string message);
 
 void messageHandler(QtMsgType type, const QMessageLogContext &, const QString &message) {
     QString msgType;
@@ -77,6 +80,8 @@ int main(int argc, char **argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
 #endif
 
+    rtc::InitLogger(rtc::LogLevel::Warning, logCallback);
+
     QIcon::setThemeName("material");
 
     QStringList languageQmFiles = QDir{":/qt/qml/Sharity/i18n"}.entryList();
@@ -98,4 +103,29 @@ int main(int argc, char **argv) {
     }
 
     return app.exec();
+}
+
+void logCallback(rtc::LogLevel level, std::string message) {
+    switch (level) {
+        case rtc::LogLevel::None:
+            break;
+        case rtc::LogLevel::Fatal:
+            qWarning() << message;
+            break;
+        case rtc::LogLevel::Error:
+            qWarning() << message;
+            break;
+        case rtc::LogLevel::Warning:
+            qWarning() << message;
+            break;
+        case rtc::LogLevel::Info:
+            qInfo() << message;
+            break;
+        case rtc::LogLevel::Debug:
+            qDebug() << message;
+            break;
+        case rtc::LogLevel::Verbose:
+            qDebug() << message;
+            break;
+    }
 }
