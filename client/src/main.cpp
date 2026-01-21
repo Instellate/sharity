@@ -7,7 +7,11 @@
 #include <QtDebug>
 #include <QtLogging>
 #include <QtSystemDetection>
+
 #include <rtc/global.hpp>
+#include <iostream>
+#include <SBarcodeGenerator.h>
+#include <SBarcodeScanner.h>
 
 #include "android.h"
 
@@ -24,7 +28,6 @@
 #include <QStyleHints>
 #endif
 
-#include <iostream>
 
 void logCallback(rtc::LogLevel level, const std::string &message);
 
@@ -68,6 +71,9 @@ int main(int argc, char **argv) {
     rtc::InitLogger(rtc::LogLevel::Warning, logCallback);
 
     QIcon::setThemeName("material");
+
+    qmlRegisterType<SBarcodeGenerator>("com.scythestudio.scodes", 1, 0, "SBarcodeGenerator");
+    qmlRegisterType<SBarcodeScanner>("com.scythestudio.scodes", 1, 0, "SBarcodeScanner");
 
     QStringList languageQmFiles = QDir{":/qt/qml/Sharity/i18n"}.entryList();
     QStringList languages;

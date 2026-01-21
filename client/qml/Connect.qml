@@ -107,4 +107,27 @@ ColumnLayout {
             }
         }
     }
+
+    Button {
+        Layout.alignment: Qt.AlignHCenter
+
+        visible: !root.isUploader
+        text: qsTr("Scan QR code")
+
+        onClicked: qrCodeScan.open()
+    }
+
+    QrCodeScan {
+        id: qrCodeScan
+
+        anchors.centerIn: parent
+
+        onValueCaptured: function (captured) {
+            if (WebSocket.isValidKey(captured)) {
+                WebSocket.open(websocketUrl.text, captured);
+            } else {
+                root.toast.display(qsTr("The key is invalid"));
+            }
+        }
+    }
 }
