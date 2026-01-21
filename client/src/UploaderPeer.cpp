@@ -30,7 +30,14 @@ void UploaderPeer::startRtcNegotiation() {
         });
     }
 
-    DataChannel channel = this->_peer->createDataChannel(this->_selectedFile.fileName().toStdString());
+#ifdef Q_OS_ANDROID
+    QFileInfo fileInfo{this->_selectedFile.toString()};
+    QString fileName = fileInfo.fileName();
+#else
+    QString fileName = this->_selectedFile.fileName();
+#endif
+
+    DataChannel channel = this->_peer->createDataChannel(fileName.toStdString());
     channel->onOpen([this, channel] {
         qDebug() << "Data channel" << channel->label() << "for uploading was opened";
         this->_streamFuture = QtConcurrent::run(&UploaderPeer::handleFileUpload, this, channel);
@@ -44,14 +51,18 @@ void UploaderPeer::startRtcNegotiation() {
 }
 
 void UploaderPeer::handleFileUpload(const DataChannel &channel) {
+#ifdef Q_OS_ANDROID
+    QFile file{this->_selectedFile.toString()};
+#else
     const QString localFile = this->_selectedFile.toLocalFile();
-    qDebug() << "Starting file upload for file:" << localFile;
-
     QFile file{localFile};
+#endif
+
     if (!file.open(QIODeviceBase::ReadOnly)) {
-        qWarning() << "Cannot open file:" << localFile;
+        qWarning() << "Cannot open file:" << this->_selectedFile;
         return;
     }
+    qDebug() << "Starting file upload for file:" << this->_selectedFile;
 
     this->_fileSize = file.size();
     emit fileSizeChanged();
@@ -129,6 +140,15 @@ QUrl UploaderPeer::selectedFile() const { return this->_selectedFile; }
 void UploaderPeer::setSelectedFile(const QUrl &url) {
     this->_selectedFile = url;
     emit selectedFileChanged();
+}
+
+QString UploaderPeer::fileName() const {
+#ifdef Q_OS_ANDROID
+    const QFileInfo fileInfo{this->_selectedFile.toString()};
+    return fileInfo.fileName();
+#else
+    return this->_selectedFile.toLocalFile();
+#endif
 }
 
 void UploaderPeer::startFileNegotiation() const {

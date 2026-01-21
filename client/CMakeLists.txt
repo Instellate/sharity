@@ -73,8 +73,8 @@ qt_add_executable(sharity-client
         src/SasVerification.cpp
         src/DownloaderPeer.cpp
         src/UploaderPeer.cpp
-        ${SHARITY_RESOURCES}
-        src/certificate.cpp)
+        src/android.cpp
+        ${SHARITY_RESOURCES})
 target_link_libraries(
   sharity-client
   PRIVATE Qt6::Core
