@@ -16,7 +16,6 @@
 #include <QStyleHints>
 #include <QUrl>
 
-// USE THIS ONLY ON ANDROID
 QString getCaCertificate() {
     QDir appConfig{QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)};
     QFile previousCaCert{appConfig.filePath("cacert.pem")};
@@ -56,14 +55,14 @@ QJniObject &contentResolverInstance() {
 struct JniContentValues {
     QJniObject object{"android/content/ContentValues"};
 
-    void put(const QString &key, const QString &value) {
+    void put(const QString &key, const QString &value) const {
         object.callMethod<void>("put",
                                 "(Ljava/lang/String;Ljava/lang/String;)V",
                                 QJniObject::fromString(key).object<jstring>(),
                                 QJniObject::fromString(value).object<jstring>());
     }
 
-    void put(const QString &key, const qint32 value) {
+    void put(const QString &key, const qint32 value) const {
         QJniObject integer = QJniObject::callStaticMethod<QtJniTypes::Integer>(
                 "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", jint(value));
 
@@ -75,6 +74,8 @@ struct JniContentValues {
 };
 
 #define MEDIA_COLUMN_IS_PENDING "is_pending"
+#define MEDIA_COLUMN_DISPLAY_NAME "_display_name"
+#define MEDIA_COLUMN_MIME_TYPE "mime_type"
 
 QJniObject getDownloadUri(const QString &fileName) {
     if (!QNativeInterface::QAndroidApplication::isActivityContext()) {
@@ -92,8 +93,8 @@ QJniObject getDownloadUri(const QString &fileName) {
     qDebug() << "Mime type for download file is" << fileType.name();
 
     JniContentValues contentValues{};
-    contentValues.put("_display_name", fileName);
-    contentValues.put("mime_type", fileType.name());
+    contentValues.put(MEDIA_COLUMN_DISPLAY_NAME, fileName);
+    contentValues.put(MEDIA_COLUMN_MIME_TYPE, fileType.name());
     contentValues.put(MEDIA_COLUMN_IS_PENDING, 1);
 
     const QJniObject contentResolver = contentResolverInstance();
@@ -114,7 +115,7 @@ QJniObject getAndroidUri(const QString &url) {
             "android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;", QJniObject::fromString(url));
 }
 
-void urlDonePending(QJniObject uri) {
+void urlDonePending(const QJniObject& uri) {
     JniContentValues contentValues;
     contentValues.put(MEDIA_COLUMN_IS_PENDING, 0);
 
@@ -136,7 +137,6 @@ constexpr qint32 SYSTEM_BACKGROUND_LIGHT = 0x0106006a;
 
 constexpr qint32 TEXT_COLOR_PRIMARY = 0x01010036;
 constexpr qint32 COLOR_ACCENT = 0x01010435;
-
 
 QColor setMaterialColors34() {
     QJniObject context = QNativeInterface::QAndroidApplication::context();
@@ -188,22 +188,6 @@ QColor setMaterialColors() {
         return QColor{QRgb{0x9FA8DA}};
     }
     return QColor{QRgb{0x3F51B5}};
-}
-
-int openFdFromContentUri(const QUrl &url) {
-    QJniObject androidUri = getAndroidUri(url.toString());
-
-    const QJniObject contentResolver = contentResolverInstance();
-    QJniObject fileDescriptor = contentResolver.callMethod<jobject>(
-            "openFileDescriptor",
-            "(Landroid/net/Uri;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
-            androidUri.object<jobject>(),
-            QJniObject::fromString("rw").object<jobject>());
-
-    int fd = fileDescriptor.callMethod<jint>("detachFd");
-    qDebug() << "Got fd" << fd << "for url" << url;
-
-    return fd;
 }
 
 int AndroidContentFile::openFd(const QJniObject &uri) {

@@ -1,0 +1,53 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 9303528..549bff3 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.1)
++cmake_minimum_required(VERSION 3.12)
+ 
+ project(SCodes LANGUAGES CXX)
+ option(SCODES_DEBUG OFF)
+@@ -19,19 +19,13 @@ set(BUILD_BLACKBOX_TESTS OFF)
+ set(BUILD_EXAMPLES OFF)
+ add_subdirectory(zxing-cpp)
+ 
+-find_package(QT NAMES Qt5 Qt6 COMPONENTS Core Multimedia Concurrent Quick REQUIRED)
+-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Multimedia Concurrent Quick REQUIRED)
++find_package(Qt6 REQUIRED COMPONENTS Core Multimedia Concurrent Quick CorePrivate)
+ 
+ file(GLOB SOURCE_CPP
+     "*.cpp"
+ )
+ 
+-if(QT_VERSION_MAJOR EQUAL 6)
+-    list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeFilter.cpp")
+-else()
+-    list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeScanner.cpp")
+-endif()
+-
++list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeFilter.cpp")
+ 
+ add_library(${PROJECT_NAME} STATIC ${SOURCE_CPP})
+ target_sources(${PROJECT_NAME} PRIVATE private/debug.h)
+@@ -46,18 +40,11 @@ if(SCODES_DEBUG)
+ endif()
+ 
+ 
+-target_link_libraries(${PROJECT_NAME} PUBLIC ZXing Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Quick)
++target_link_libraries(${PROJECT_NAME} PRIVATE ZXing Qt6::Core Qt6::Multimedia Qt6::Concurrent Qt6::Quick)
+ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+ target_include_directories(${PROJECT_NAME} PRIVATE  "${CMAKE_CURRENT_SOURCE_DIR}/private")
+ 
+ if (ANDROID)
+-
+-    if(QT_VERSION_MAJOR EQUAL 5)
+-        find_package(Qt${QT_VERSION_MAJOR} COMPONENTS AndroidExtras REQUIRED)
+-        target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::AndroidExtras)
+-    else()
+-        target_link_libraries(${PROJECT_NAME} PUBLIC Qt::CorePrivate)
+-    endif()
+-
++    target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
+     target_link_libraries(${PROJECT_NAME} PUBLIC EGL GLESv2)
+ endif()

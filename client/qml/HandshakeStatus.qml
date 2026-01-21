@@ -58,7 +58,7 @@ ColumnLayout {
         onClicked: {
             const key = connectionKey.text;
             const wsUrl = new URL(settings.websocketUrl);
-            
+
             const searchParams = new URLSearchParams();
             searchParams.set("path", wsUrl.pathname);
             searchParams.set("key", key);
@@ -78,9 +78,24 @@ ColumnLayout {
 
     Button {
         Layout.alignment: Qt.AlignHCenter
+        text: qsTr("Get QR code")
+        visible: !WebSocket.isDownloader
+
+        onClicked: qrCodePopUp.open()
+    }
+
+    Button {
+        Layout.alignment: Qt.AlignHCenter
 
         text: qsTr("Cancel")
         enabled: !WebSocket.established
         onClicked: WebSocket.close()
+    }
+
+    QrCodePopUp {
+        id: qrCodePopUp
+        qrValue: WebSocket.publicKey
+
+        anchors.centerIn: parent
     }
 }

@@ -13,14 +13,13 @@
 #include <QString>
 #include <QUrl>
 
-// USE THIS ONLY ON ANDROID
 QString getCaCertificate();
 
 QJniObject &contentResolverInstance();
 
 QJniObject getDownloadUri(const QString &fileName);
 
-void urlDonePending(QJniObject uri);
+void urlDonePending(const QJniObject& uri);
 
 QColor setMaterialColors();
 

@@ -7,13 +7,15 @@ option(CONFIGURE_BUNDLE "Configures CPack for MacOS bundle installer packaging" 
 
 include(FetchContent)
 
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
+
 if (EMSCRIPTEN)
   message(STATUS "Configuring for WASM target")
 
   FetchContent_Declare(
     LibDataChannelWasm
     GIT_REPOSITORY https://github.com/paullouisageneau/datachannel-wasm.git
-    GIT_TAG v0.3.2)
+    GIT_TAG v0.4.0)
   FetchContent_MakeAvailable(LibDataChannelWasm)
 
   set(LIBDATACHANNEL datachannel-wasm)
@@ -25,18 +27,28 @@ else ()
   set(LIBDATACHANNEL LibDataChannel::LibDataChannel)
 endif ()
 
+set(QT_VERSION_MAJOR 6)
+
 FetchContent_Declare(
   Corrosion
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
   GIT_TAG v0.6.1)
-FetchContent_MakeAvailable(Corrosion)
+
+FetchContent_Declare(
+  SCodes
+  GIT_REPOSITORY https://github.com/somcosoftware/SCodes.git
+  SOURCE_SUBDIR src
+  PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/scode-cmake.patch
+  UPDATE_DISCONNECTED 1)
+
+FetchContent_MakeAvailable(Corrosion SCodes)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTORCC ON)
-# set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 corrosion_import_crate(MANIFEST_PATH
                        ${CMAKE_SOURCE_DIR}/../vodozemac/Cargo.toml)
@@ -46,7 +58,7 @@ if (MSVC AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Re
   corrosion_set_env_vars(vodozemac "CFLAGS=-MDd" "CXXFLAGS=-MDd")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Gui Widgets Quick Qml LinguistTools Multimedia CorePrivate)
 qt_standard_project_setup(
   I18N_SOURCE_LANGUAGE en_GB
   I18N_TRANSLATED_LANGUAGES sv_SE de_DE)
@@ -58,7 +70,6 @@ endif ()
 if (QT_KNOWN_POLICY_QTP0002)
   qt_policy(SET QTP0002 NEW)
 endif()
-
 
 set(RESOURCE_FILES resources.qrc)
 if (EMSCRIPTEN)
@@ -83,8 +94,14 @@ target_link_libraries(
           Qt6::Widgets
           Qt6::Quick
           Qt6::Qml
+          Qt6::Multimedia
           vodozemac
+          SCodes
           ${LIBDATACHANNEL})
+
+if (ANDROID)
+  target_link_libraries(sharity-client PRIVATE Qt::CorePrivate)
+endif ()
 
 set_target_properties(sharity-client PROPERTIES
   QT_ANDROID_APP_NAME "Sharity"
@@ -96,9 +113,11 @@ if (WIN32)
  target_link_libraries(sharity-client PRIVATE bcrypt)
 endif ()
 
+message(STATUS ${SCodes_SOURCE_DIR}/zxing-cpp)
+
 target_include_directories(sharity-client PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(sharity-client
-                           PUBLIC ${CMAKE_SOURCE_DIR}/../vodozemac/include)
+                           PUBLIC ${CMAKE_SOURCE_DIR}/../vodozemac/include ${SCodes_SOURCE_DIR} ${SCodes_SOURCE_DIR}/zxing-cpp/core/src)
 
 file(GLOB_RECURSE QML_FILES ${PROJECT_SOURCE_DIR}/qml/*.qml)
 foreach (QML_FILE IN LISTS QML_FILES)
