@@ -22,6 +22,8 @@ QJniObject getDownloadUri(const QString &fileName);
 
 void urlDonePending(QJniObject uri);
 
+QColor setMaterialColors();
+
 class AndroidContentFile : public QFile {
     QJniObject _contentUri;
     bool _isPending = false;
