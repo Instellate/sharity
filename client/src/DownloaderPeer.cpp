@@ -8,23 +8,31 @@
 #include <QStandardPaths>
 #include <QtLogging>
 
-#include <stdexcept>
-
 #include "WebSocket.h"
 
 void DownloaderPeer::handleDataChannel(const DataChannel &channel) {
     qDebug() << "Got data channel" << channel->label();
+
+#ifdef Q_OS_ANDROID
+    auto file = QSharedPointer<AndroidContentFile>::create();
+    if (!file->openDownloadFile(QString::fromStdString(channel->label()))) {
+        qFatal() << "Cannot open file" << channel->label();
+    }
+#else
     const QDir downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     auto file = QSharedPointer<QFile>::create(downloadPath.filePath(QString::fromStdString(channel->label())));
 
     if (!file->open(QIODeviceBase::WriteOnly, QFileDevice::ReadUser | QFileDevice::WriteUser)) {
-        throw std::runtime_error{"Cannot open file " + channel->label()};
+        qFatal() << "Cannot open file" << channel->label();
     }
+#endif
 
-    channel->onClosed([this, channel] {
-        qInfo() << "Data channel " << channel->label() << "got closed";
+    channel->onClosed([this, channel, file] {
+        qInfo() << "Data channel" << channel->label() << "got closed";
         std::erase(this->_channels, channel);
+        file->close();
     });
+
     channel->onMessage([this, file](const std::variant<rtc::binary, rtc::string> &message) {
         if (std::holds_alternative<rtc::string>(message)) {
             qWarning() << "Got string from datachannel when expected binary. Ignoring this message";
@@ -77,8 +85,8 @@ DownloaderPeer::~DownloaderPeer() {
 }
 
 DownloaderPeer::State DownloaderPeer::downloadState() const { return this->_state; }
-qint64 DownloaderPeer::fileSize() const { return this->_fileSize; }
-qint64 DownloaderPeer::amountDownloaded() const { return this->_amountDownloaded; }
+quint64 DownloaderPeer::fileSize() const { return this->_fileSize; }
+quint64 DownloaderPeer::amountDownloaded() const { return this->_amountDownloaded; }
 qint64 DownloaderPeer::speed() const { return this->_speed; }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

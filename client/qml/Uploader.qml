@@ -31,9 +31,7 @@ ColumnLayout {
                 return qsTr("No file selected");
             }
 
-            const path = fileDialog.selectedFile.toString().replace(/^(file:\/{2})/, "");
-            const cleanPath = decodeURIComponent(path);
-            return qsTr("Selected file: %1").arg(cleanPath);
+            return qsTr("Selected file: %1").arg(peer.fileName);
         }
     }
 

@@ -11,6 +11,7 @@
 class UploaderPeer : public QObject {
     Q_OBJECT
     Q_PROPERTY(QUrl selectedFile READ selectedFile WRITE setSelectedFile NOTIFY selectedFileChanged)
+    Q_PROPERTY(QString fileName READ fileName NOTIFY fileNameChanged)
     Q_PROPERTY(qint64 fileSize READ fileSize NOTIFY fileSizeChanged)
     Q_PROPERTY(qint64 amountUploaded READ amountUploaded NOTIFY amountUploadedChanged)
     Q_PROPERTY(qint64 speed READ speed NOTIFY speedChanged)
@@ -44,6 +45,8 @@ public:
     [[nodiscard]] QUrl selectedFile() const;
     void setSelectedFile(const QUrl &url);
 
+    [[nodiscard]] QString fileName() const;
+
     Q_INVOKABLE void startFileNegotiation() const;
     Q_INVOKABLE void close();
 
@@ -53,6 +56,7 @@ signals:
     void amountUploadedChanged();
     void fileSizeChanged();
     void speedChanged();
+    void fileNameChanged();
 
 private slots:
     void wsMessage(const QString &type, const QJsonObject &json);

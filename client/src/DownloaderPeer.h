@@ -16,11 +16,7 @@ class DownloaderPeer : public QObject {
     QML_ELEMENT
 
 public:
-    enum State {
-        Waiting,
-        Downloading,
-        Downloaded
-    };
+    enum State { Waiting, Downloading, Downloaded };
     Q_ENUM(State);
 
 private:
@@ -30,12 +26,12 @@ private:
     std::vector<DataChannel> _channels;
 
     QTimer *_timer;
-    QAtomicInteger<qint64> _downloadedSinceTick;
+    QAtomicInteger<quint64> _downloadedSinceTick;
 
     State _state = Waiting;
     QString _expectedLabel;
-    qint64 _fileSize = 0;
-    qint64 _amountDownloaded = 0;
+    quint64 _fileSize = 0;
+    quint64 _amountDownloaded = 0;
     qint64 _speed = 0;
 
     void handleDataChannel(const DataChannel &channel);
@@ -46,8 +42,8 @@ public:
     ~DownloaderPeer() override;
 
     [[nodiscard]] State downloadState() const;
-    [[nodiscard]] qint64 fileSize() const;
-    [[nodiscard]] qint64 amountDownloaded() const;
+    [[nodiscard]] quint64 fileSize() const;
+    [[nodiscard]] quint64 amountDownloaded() const;
     [[nodiscard]] qint64 speed() const;
 
     Q_INVOKABLE void close();

@@ -1,0 +1,181 @@
+//
+// Created by instellate on 2026-01-20.
+//
+
+#include "android.h"
+
+#ifdef Q_OS_ANDROID
+
+#include <QCoreApplication>
+#include <QDir>
+#include <QMimeDatabase>
+#include <QStandardPaths>
+#include <QUrl>
+
+// USE THIS ONLY ON ANDROID
+QString getCaCertificate() {
+    QDir appConfig{QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)};
+    QFile previousCaCert{appConfig.filePath("cacert.pem")};
+    if (appConfig.exists("cacert.pem")) {
+        appConfig.remove("cacert.pem");
+    }
+
+    if (!appConfig.exists()) {
+        appConfig.cdUp();
+        // ReSharper disable once CppExpressionWithoutSideEffects
+        appConfig.mkpath("settings");
+        appConfig.cd("settings");
+    }
+
+    QFile caCert{":/resources/cacert.pem"};
+    caCert.copy(appConfig.filePath("cacert.pem"));
+
+    if (!appConfig.exists("cacert.pem")) {
+        qFatal() << "cacerts.pem does not exist";
+    }
+
+    qputenv("SSL_CERT_FILE", appConfig.filePath("cacert.pem").toUtf8());
+
+    return appConfig.filePath("cacert.pem");
+}
+
+QJniObject &contentResolverInstance() {
+    static QJniObject contentResolver;
+    if (!contentResolver.isValid()) {
+        contentResolver = QJniObject(QNativeInterface::QAndroidApplication::context())
+                                  .callMethod<QtJniTypes::ContentResolver>("getContentResolver");
+    }
+
+    return contentResolver;
+}
+
+struct JniContentValues {
+    QJniObject object{"android/content/ContentValues"};
+
+    void put(const QString &key, const QString &value) {
+        object.callMethod<void>("put",
+                                "(Ljava/lang/String;Ljava/lang/String;)V",
+                                QJniObject::fromString(key).object<jstring>(),
+                                QJniObject::fromString(value).object<jstring>());
+    }
+
+    void put(const QString &key, const qint32 value) {
+        QJniObject integer = QJniObject::callStaticMethod<QtJniTypes::Integer>(
+                "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", jint(value));
+
+        object.callMethod<void>("put",
+                                "(Ljava/lang/String;Ljava/lang/Integer;)V",
+                                QJniObject::fromString(key).object<jstring>(),
+                                integer.object<jobject>());
+    }
+};
+
+#define MEDIA_COLUMN_IS_PENDING "is_pending"
+
+QJniObject getDownloadUri(const QString &fileName) {
+    if (!QNativeInterface::QAndroidApplication::isActivityContext()) {
+        qFatal() << "Non activity context";
+    }
+
+    QJniObject externalContentUri = QJniObject::getStaticField<QtJniTypes::Uri>("android/provider/MediaStore$Downloads",
+                                                                                "EXTERNAL_CONTENT_URI");
+
+    QJniObject directoryDownloads =
+            QJniObject::getStaticField<jstring>("android/os/Environment", "DIRECTORY_DOWNLOADS");
+
+    const QMimeDatabase db{};
+    const QMimeType fileType = db.mimeTypeForFile(fileName);
+    qDebug() << "Mime type for download file is" << fileType.name();
+
+    JniContentValues contentValues{};
+    contentValues.put("_display_name", fileName);
+    contentValues.put("mime_type", fileType.name());
+    contentValues.put(MEDIA_COLUMN_IS_PENDING, 1);
+
+    const QJniObject contentResolver = contentResolverInstance();
+    const QJniObject androidUri =
+            contentResolver.callMethod<jobject>("insert",
+                                                "(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;",
+                                                externalContentUri,
+                                                contentValues.object);
+    if (!androidUri.isValid()) {
+        qFatal() << "ContentResolver returned null URI";
+    }
+
+    return androidUri;
+}
+
+QJniObject getAndroidUri(const QString &url) {
+    return QJniObject::callStaticMethod<jobject>(
+            "android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;", QJniObject::fromString(url));
+}
+
+void urlDonePending(QJniObject uri) {
+    JniContentValues contentValues;
+    contentValues.put(MEDIA_COLUMN_IS_PENDING, 0);
+
+    const QJniObject contentResolver = contentResolverInstance();
+    const qint32 updated = contentResolver.callMethod<jint>(
+            "update",
+            "(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I",
+            uri,
+            contentValues.object,
+            nullptr,
+            nullptr);
+    qDebug() << "Updated with not pending:" << updated;
+}
+
+int openFdFromContentUri(const QUrl &url) {
+    QJniObject androidUri = getAndroidUri(url.toString());
+
+    const QJniObject contentResolver = contentResolverInstance();
+    QJniObject fileDescriptor = contentResolver.callMethod<jobject>(
+            "openFileDescriptor",
+            "(Landroid/net/Uri;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
+            androidUri.object<jobject>(),
+            QJniObject::fromString("rw").object<jobject>());
+
+    int fd = fileDescriptor.callMethod<jint>("detachFd");
+    qDebug() << "Got fd" << fd << "for url" << url;
+
+    return fd;
+}
+
+int AndroidContentFile::openFd(const QJniObject &uri) {
+    const QJniObject contentResolver = contentResolverInstance();
+    QJniObject fileDescriptor = contentResolver.callMethod<jobject>(
+            "openFileDescriptor",
+            "(Landroid/net/Uri;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
+            uri.object<jobject>(),
+            QJniObject::fromString("rw").object<jobject>());
+
+    const int fd = fileDescriptor.callMethod<jint>("detachFd");
+    qDebug() << "Got fd" << fd << "for url" << uri.callMethod<jstring>("toString").toString();
+    return fd;
+}
+
+bool AndroidContentFile::openDownloadFile(const QString &fileName) {
+    this->_contentUri = getDownloadUri(fileName);
+    this->_isPending = true;
+
+    const QJniObject contentResolver = contentResolverInstance();
+    const int fd = openFd(this->_contentUri);
+
+    return open(fd, ReadWrite, AutoCloseHandle);
+}
+
+bool AndroidContentFile::openContentUri(const QUrl &url) {
+    const QJniObject uri = getAndroidUri(url.toString());
+    const int fd = openFd(uri);
+
+    return open(fd, ReadWrite, AutoCloseHandle);
+}
+
+void AndroidContentFile::close() {
+    if (this->_isPending) {
+        urlDonePending(this->_contentUri);
+    }
+    QFile::close();
+}
+
+#endif

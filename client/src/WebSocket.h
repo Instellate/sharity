@@ -5,6 +5,7 @@
 #include <rtc/websocket.hpp>
 #include <variant>
 #include <vodozemac.h>
+#include <android.h>
 
 #include <QMutex>
 #include <QObject>
@@ -12,9 +13,6 @@
 #include <QStringList>
 #include <qqmlintegration.h>
 
-#ifdef Q_OS_ANDROID
-#include <certificate.h>
-#endif
 
 inline rtc::WebSocket::Configuration getWebsocketConfig() {
     rtc::WebSocket::Configuration config{};
