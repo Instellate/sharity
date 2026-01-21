@@ -3,17 +3,18 @@ import QtQuick.Controls.Material
 
 ApplicationWindow {
     id: root
-    visible: true
+    visible: false
     title: "Sharity"
     width: 500
     height: 500
 
     Material.theme: Material.System
-    Material.accent: Material.Indigo
+    Material.accent: root.accent
 
     property bool sasConfirmed: false
     property alias languages: settings.languages
     property var connectUrl: null
+    property string accent: "#9FA8DA"
 
     Connections {
         target: WebSocket

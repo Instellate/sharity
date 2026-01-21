@@ -20,6 +20,10 @@
 #include <QStringList>
 #endif
 
+#ifndef Q_OS_ANDROID
+#include <QStyleHints>
+#endif
+
 #include <iostream>
 
 void logCallback(rtc::LogLevel level, const std::string &message);
@@ -74,6 +78,14 @@ int main(int argc, char **argv) {
 
 #ifdef Q_OS_ANDROID
     contentResolverInstance();
+    QColor accent = setMaterialColors();
+#else
+    QColor accent;
+    if (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        accent = QColor{0x9FA8DA};
+    } else {
+        accent = QColor{0x3F51B5};
+    }
 #endif
 
     QQmlApplicationEngine engine{"Sharity", "MainWindow"};
@@ -81,11 +93,15 @@ int main(int argc, char **argv) {
 
     QObject *main = engine.rootObjects().first();
     main->setProperty("languages", languages);
+    main->setProperty("accent", accent.name());
+
     if (argc > 1) {
         const QUrl url{argv[1]};
         qDebug() << "Got url" << url;
         main->setProperty("connectUrl", url);
     }
+
+    main->setProperty("visible", true);
 
     return app.exec();
 }

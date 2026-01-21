@@ -6,10 +6,14 @@
 
 #ifdef Q_OS_ANDROID
 
+#include <QApplication>
+#include <QColor>
 #include <QCoreApplication>
 #include <QDir>
+#include <QGuiApplication>
 #include <QMimeDatabase>
 #include <QStandardPaths>
+#include <QStyleHints>
 #include <QUrl>
 
 // USE THIS ONLY ON ANDROID
@@ -123,6 +127,67 @@ void urlDonePending(QJniObject uri) {
             nullptr,
             nullptr);
     qDebug() << "Updated with not pending:" << updated;
+}
+
+constexpr qint32 SYSTEM_PRIMARY_DARK = 0x0106008b;
+constexpr qint32 SYSTEM_PRIMARY_LIGHT = 0x01060060;
+constexpr qint32 SYSTEM_BACKGROUND_DARK = 0x01060095;
+constexpr qint32 SYSTEM_BACKGROUND_LIGHT = 0x0106006a;
+
+constexpr qint32 TEXT_COLOR_PRIMARY = 0x01010036;
+constexpr qint32 COLOR_ACCENT = 0x01010435;
+
+
+QColor setMaterialColors34() {
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+    QJniObject theme = context.callMethod<jobject>("getTheme", "()Landroid/content/res/Resources$Theme;");
+    QJniObject resources = context.callMethod<jobject>("getResources", "()Landroid/content/res/Resources;");
+
+    auto getColor = [&](qint32 id) {
+        return resources.callMethod<jint>("getColor", "(ILandroid/content/res/Resources$Theme;)I", jint(id), theme);
+    };
+
+    Qt::ColorScheme colorScheme = QGuiApplication::styleHints()->colorScheme();
+
+    QRgb primary;
+    QRgb background;
+    if (colorScheme == Qt::ColorScheme::Dark) {
+        primary = getColor(SYSTEM_PRIMARY_DARK);
+        background = getColor(SYSTEM_BACKGROUND_DARK);
+    } else {
+        primary = getColor(SYSTEM_PRIMARY_LIGHT);
+        background = getColor(SYSTEM_BACKGROUND_LIGHT);
+    }
+
+    QJniObject typedValue{"android/util/TypedValue"};
+    theme.callMethod<jboolean>(
+            "resolveAttribute", "(ILandroid/util/TypedValue;Z)Z", TEXT_COLOR_PRIMARY, typedValue, true);
+    QRgb foreground = context.callMethod<jint>("getColor", "(I)I", typedValue.getField<jint>("resourceId"));
+
+    theme.callMethod<jboolean>("resolveAttribute", "(ILandroid/util/TypedValue;Z)Z", COLOR_ACCENT, typedValue, true);
+    QRgb accent = context.callMethod<jint>("getColor", "(I)I", typedValue.getField<jint>("resourceId"));
+
+    QColor primaryColor{primary};
+    QColor accentColor{accent};
+    QColor foregroundColor{foreground};
+    QColor backgroundColor{background};
+
+    qputenv("QT_QUICK_CONTROLS_MATERIAL_PRIMARY", primaryColor.name().toUtf8());
+    qputenv("QT_QUICK_CONTROLS_MATERIAL_FOREGROUND", foregroundColor.name().toUtf8());
+    qputenv("QT_QUICK_CONTROLS_MATERIAL_BACKGROUND", backgroundColor.name().toUtf8());
+
+    return accentColor;
+}
+
+QColor setMaterialColors() {
+    if (QNativeInterface::QAndroidApplication::sdkVersion() >= 34) {
+        return setMaterialColors34();
+    }
+
+    if (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        return QColor{QRgb{0x9FA8DA}};
+    }
+    return QColor{QRgb{0x3F51B5}};
 }
 
 int openFdFromContentUri(const QUrl &url) {
