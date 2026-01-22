@@ -2,6 +2,12 @@ name: Build
 on:
   push:
     branches: [ 'main' ]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 
 # This job is to build a Windows Installer and will only run on main branch
 jobs:
