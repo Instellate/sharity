@@ -7,4 +7,7 @@ fonts
 # Development
 .idea
 .qmlls.ini
+
+# Android
 android-env
+configure-android.sh

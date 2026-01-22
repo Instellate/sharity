@@ -36,6 +36,7 @@
     <message>
         <location filename="../qml/Connect.qml" line="87"/>
         <location filename="../qml/Connect.qml" line="105"/>
+        <location filename="../qml/Connect.qml" line="143"/>
         <source>The key is invalid</source>
         <translation>Der Schlüssel ist ungültig</translation>
     </message>
@@ -48,6 +49,17 @@
         <location filename="../qml/Connect.qml" line="96"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../qml/Connect.qml" line="115"/>
+        <source>Scan QR code</source>
+        <translation>QR-Code scannen</translation>
+    </message>
+    <message>
+        <location filename="../qml/Connect.qml" line="121"/>
+        <location filename="../qml/Connect.qml" line="155"/>
+        <source>Camera access is disabled</source>
+        <translation>Kamerazugriff ist deaktiviert</translation>
     </message>
 </context>
 <context>
@@ -118,7 +130,12 @@
         <translation>Kopieren Herunterladen URL</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="82"/>
+        <location filename="../qml/HandshakeStatus.qml" line="81"/>
+        <source>Get QR code</source>
+        <translation>QR Code abrufen</translation>
+    </message>
+    <message>
+        <location filename="../qml/HandshakeStatus.qml" line="90"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -174,7 +191,7 @@
 <context>
     <name>SettingsPopup</name>
     <message>
-        <location filename="../qml/SettingsPopup.qml" line="52"/>
+        <location filename="../qml/SettingsPopup.qml" line="60"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
@@ -197,23 +214,23 @@
         <translation>Keine Datei ausgewählt</translation>
     </message>
     <message>
-        <location filename="../qml/Uploader.qml" line="36"/>
+        <location filename="../qml/Uploader.qml" line="34"/>
         <source>Selected file: %1</source>
         <translation>Ausgewählte Datei: %1</translation>
     </message>
     <message>
-        <location filename="../qml/Uploader.qml" line="45"/>
+        <location filename="../qml/Uploader.qml" line="43"/>
         <source>Upload file</source>
         <translation>Datei hochladen</translation>
     </message>
     <message>
-        <location filename="../qml/Uploader.qml" line="56"/>
+        <location filename="../qml/Uploader.qml" line="54"/>
         <source>%1  out of %2</source>
         <extracomment>How much of the file has been downloaded</extracomment>
         <translation>%1 von %2</translation>
     </message>
     <message>
-        <location filename="../qml/Uploader.qml" line="80"/>
+        <location filename="../qml/Uploader.qml" line="78"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
