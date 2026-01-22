@@ -8,7 +8,9 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-
+    paths:
+      - client/**
+      - vodozemac/**
 # This job is to build a Windows Installer and will only run on main branch
 jobs:
   build-windows:
