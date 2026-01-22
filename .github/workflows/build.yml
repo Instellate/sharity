@@ -19,6 +19,7 @@ jobs:
           version: '6.9.1'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
+          modules: qtmultimedia
           cache: 'true'
 
       - name: Install CMake
@@ -27,7 +28,7 @@ jobs:
           version: 4.1.0
 
       - name: Install OpenSSL
-        working-directory: ${{ runner.workspace }}
+        working-directory: ${{ github.workspace }}
         run: |
           curl.exe -O https://slproweb.com/download/Win64OpenSSL_Light-3_6_0.msi
           msiexec /package Win64OpenSSL_Light-3_6_0.msi /quiet
@@ -40,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-libdatachannel
 
       - name: Build LibDataChannel
-        working-directory: ${{ runner.workspace }}
+        working-directory: ${{ github.workspace }}
         if: steps.cache-libdatachannel-restore.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/paullouisageneau/libdatachannel.git
@@ -77,6 +78,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: ${{ github.workspace }}/client/build/Sharity-*-win64.exe
+          name: 'windows-build'
 
       - name: Save Cache LibDataChannel
         id: cache-libdatachannel-save
@@ -98,7 +100,7 @@ jobs:
         run: sudo apt update && sudo apt install -y libsrtp2-dev ninja-build
 
       - name: Install CMake
-        working-directory: ${{ runner.workspace }}
+        working-directory: ${{ github.workspace }}
         run: |
           mkdir cmake
           cd cmake
@@ -115,17 +117,19 @@ jobs:
         name: Install Qt
         with:
           host: linux
-          dir: $RUNNER_WORKSPACE
+          modules: qtmultimedia
+          version: '6.10.1'
+          dir: ${{ github.workspace }}
 
       - name: Cache LibDataChannel
         id: cache-libdatachannel
         uses: actions/cache@v4
         with:
-          path: ${{ runner.workspace }}/libdatachannel
+          path: ${{ github.workspace }}/libdatachannel
           key: ${{ runner.os }}-libdatachannel
 
       - name: Build LibDataChannel
-        working-directory: ${{ runner.workspace }}
+        working-directory: ${{ github.workspace }}
         if: steps.cache-libdatachannel.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/paullouisageneau/libdatachannel.git
@@ -137,7 +141,7 @@ jobs:
           cmake --build build
 
       - name: Install LibDataChannel
-        working-directory: ${{ runner.workspace }}/libdatachannel
+        working-directory: ${{ github.workspace }}/libdatachannel
         run: sudo cmake --install build
 
       - uses: dtolnay/rust-toolchain@stable
@@ -152,3 +156,117 @@ jobs:
         run: |
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release
           cmake --build build
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    env:
+      QT_VERSION: '6.10.1'
+      NDK_VERSION: '29.0.13846066'
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jurplel/install-qt-action@v4
+        name: Install Qt
+        with:
+          host: linux
+          target: android
+          modules: qtmultimedia
+          arch: android_arm64_v8a
+          version: ${{ env.QT_VERSION }}
+          dir: ${{ github.workspace }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        name: Install Rust
+        with:
+          target: aarch64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Install CMake
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir cmake
+          cd cmake
+          curl -LO https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0-linux-x86_64.sh
+          chmod +x cmake-4.1.0-linux-x86_64.sh
+          ./cmake-4.1.0-linux-x86_64.sh --skip-license
+          rm cmake-4.1.0-linux-x86_64.sh
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+
+      - name: Install Ninja
+        run: sudo apt update && sudo apt install -y ninja-build
+
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android
+        uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
+
+      - name: Install Android Tools
+        run: |
+          yes | sdkmanager --install "ndk;${NDK_VERSION}"
+          yes | sdkmanager --install "build-tools;36.1.0"
+          yes | sdkmanager --install "platforms;android-36"
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> $GITHUB_ENV
+
+      - name: Cache Android Libraries
+        id: cache-android-libs
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/android-libraries
+          key: android-libraries
+
+      - name: Build Android Libraries
+        if: steps.cache-android-libs.outputs.cache-hit != 'true'
+        run: ANDROID_SIGN="" BUILD_RELEASE="" ANDROID_SDK="${ANDROID_SDK_ROOT}" ANDROID_NDK="${ANDROID_NDK_ROOT}" ANDROID_QT="${GITHUB_WORKSPACE}/Qt/${QT_VERSION}/android_arm64_v8a" ./setup-android.sh
+
+      - name: Setup Android Environment
+        if: steps.cache-android-libs.outputs.cache-hit == 'true'
+        run: SKIP_LIBRARIES="" ANDROID_SIGN="" BUILD_RELEASE="" ANDROID_SDK="${ANDROID_SDK_ROOT}" ANDROID_NDK="${ANDROID_NDK_ROOT}" ANDROID_QT="${GITHUB_WORKSPACE}/Qt/${QT_VERSION}/android_arm64_v8a" ./setup-android.sh
+
+      - name: Create Debug Keystore
+        run: |
+          keytool -genkeypair \
+              -keystore $HOME/.android/debug.keystore \
+              -storepass android \
+              -keypass android \
+              -alias androiddebugkey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Build Vodozemac
+        working-directory: ${{ github.workspace }}/vodozemac
+        run: cargo build
+
+      - name: Build Sharity
+        working-directory: ${{ github.workspace }}/client
+        run: |
+          source android-env
+          export QT_ANDROID_KEYSTORE_PATH=$HOME/.android/debug.keystore
+          export QT_ANDROID_KEYSTORE_ALIAS=androiddebugkey 
+          export QT_ANDROID_KEYSTORE_STORE_PASS=android
+          export QT_ANDROID_KEYSTORE_KEY_PASS=android
+          ./configure-android.sh
+          cmake --build build-android --target apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: ${{ github.workspace }}/client/build-android/android-build/sharity-client.apk
+          name: 'android-build'

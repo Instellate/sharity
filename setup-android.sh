@@ -35,36 +35,39 @@ lib_install="${android_libs}/install"
 sharity_client="${project_root}/client"
 vodozemac="${project_root}/vodozemac"
 
-mkdir "${android_libs}"
-mkdir "${lib_install}"
+if [[ -z "${SKIP_LIBRARIES+x}" ]]; then
+  mkdir "${android_libs}"
+  mkdir "${lib_install}"
 
-cd "${android_libs}"
+  cd "${android_libs}"
 
-# Build OpenSSL
-git clone https://github.com/openssl/openssl --depth 1 -b openssl-3.6.0
-cd openssl
+  # Build OpenSSL
+  git clone https://github.com/openssl/openssl --depth 1 -b openssl-3.6.0
+  cd openssl
 
-openssl_path="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH"
-PATH="${openssl_path}" ./Configure android-arm64 -D__ANDROID_API__=21 --prefix=/
-PATH="${openssl_path}" make -j$(nproc)
-PATH="${openssl_path}" make DESTDIR="${lib_install}" install_sw install_ssldirs
+  export ANDROID_NDK_ROOT="${ANDROID_NDK}"
+  openssl_path="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH"
+  PATH="${openssl_path}" ./Configure android-arm64 -D__ANDROID_API__=21 --prefix=/
+  PATH="${openssl_path}" make -j$(nproc)
+  PATH="${openssl_path}" make DESTDIR="${lib_install}" install_sw install_ssldirs
 
-# Build LibDataChannel
-cd "${android_libs}"
-git clone https://github.com/paullouisageneau/libdatachannel --depth 1 --recursive -b v0.24.1 
+  # Build LibDataChannel
+  cd "${android_libs}"
+  git clone https://github.com/paullouisageneau/libdatachannel --depth 1 --recursive -b v0.24.1
 
-cd libdatachannel
-cmake -B build -GNinja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_ANDROID_NDK="${ANDROID_NDK}" \
-    -DCMAKE_SYSTEM_NAME=Android \
-    -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
-    -DOPENSSL_SSL_LIBRARY="${lib_install}/lib/libssl.so" \
-    -DOPENSSL_CRYPTO_LIBRARY="${lib_install}/lib/libcrypto.so" \
-    -DOPENSSL_INCLUDE_DIR="${lib_install}/include" \
-    -DNO_EXAMPLES=ON
-cmake --build build
-cmake --install build --prefix "${lib_install}"
+  cd libdatachannel
+  cmake -B build -GNinja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_ANDROID_NDK="${ANDROID_NDK}" \
+      -DCMAKE_SYSTEM_NAME=Android \
+      -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
+      -DOPENSSL_SSL_LIBRARY="${lib_install}/lib/libssl.so" \
+      -DOPENSSL_CRYPTO_LIBRARY="${lib_install}/lib/libcrypto.so" \
+      -DOPENSSL_INCLUDE_DIR="${lib_install}/include" \
+      -DNO_EXAMPLES=ON
+  cmake --build build
+  cmake --install build --prefix "${lib_install}"
+fi
 
 # Get necessary environment variables to build Vodozemac bindings properly
 cd "${vodozemac}"
@@ -81,11 +84,20 @@ configure_cmake_options="-DANDROID_SDK_ROOT=\"\${android_sdk}\" \\
 configure_build_release="${configure_cmake_options} \\
     -DCMAKE_BUILD_TYPE=Release"
 
-read -p "Build for release [y/N]: " build_release
-case "${build_release}" in
-    [Yy]*) configure_cmake_options="${configure_build_release}" ;;
-    *) ;;
-esac
+if [[ -n "${BUILD_RELEASE+x}" ]]; then
+  configure_cmake_options="${configure_build_release}"
+else
+  read -r -p "Build for release [y/N]: " build_release
+  case "${build_release}" in
+      [Yy]*) configure_cmake_options="${configure_build_release}" ;;
+      *) ;;
+  esac
+fi
+
+if [[ -n "${ANDROID_SIGN+x}" ]]; then
+  configure_cmake_options="${configure_cmake_options} \\
+    -DQT_ANDROID_SIGN_APK=ON"
+fi
 
 configure_cmake="${ANDROID_QT}/bin/qt-cmake \\
     -B build-android \\
