@@ -1,6 +1,6 @@
+import QtCore
 import QtQuick
 import QtQuick.Controls.Material
-import QtCore
 import QtQuick.Layouts
 
 ColumnLayout {
@@ -111,10 +111,24 @@ ColumnLayout {
     Button {
         Layout.alignment: Qt.AlignHCenter
 
-        visible: !root.isUploader
+        visible: !root.isUploader && Qt.platform.os === "android"
         text: qsTr("Scan QR code")
 
-        onClicked: qrCodeScan.open()
+        onClicked: {
+            if (cameraPermission.status === Qt.Granted) {
+                qrCodeScan.open();
+            } else if (cameraPermission.status === Qt.Denied) {
+                root.toast.display(qsTr("Camera access is disabled"));
+            } else {
+                cameraPermission.request();
+            }
+        }
+    }
+
+    Rectangle {
+        Layout.preferredHeight: 52
+
+        visible: root.isUploader && Qt.platform.os === "android"
     }
 
     QrCodeScan {
@@ -127,6 +141,18 @@ ColumnLayout {
                 WebSocket.open(websocketUrl.text, captured);
             } else {
                 root.toast.display(qsTr("The key is invalid"));
+            }
+        }
+    }
+
+    CameraPermission {
+        id: cameraPermission
+
+        onStatusChanged: {
+            if (cameraPermission.status === Qt.Granted) {
+                qrCodeScan.open();
+            } else if (cameraPermission.status === Qt.Denied) {
+                root.toast.display(qsTr("Camera access is disabled"));
             }
         }
     }

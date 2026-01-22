@@ -1,5 +1,5 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 9303528..549bff3 100644
+index 9303528..edfccba 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -8,6 +8,15 @@ index 9303528..549bff3 100644
  
  project(SCodes LANGUAGES CXX)
  option(SCODES_DEBUG OFF)
+@@ -7,7 +7,7 @@ option(SCODES_DEBUG OFF)
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ set(CMAKE_AUTOMOC ON)
+ set(CMAKE_AUTORCC ON)
+-set(CMAKE_CXX_STANDARD 17)
++set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ if (NOT DEFINED BUILD_SHARED_LIBS)
 @@ -19,19 +19,13 @@ set(BUILD_BLACKBOX_TESTS OFF)
  set(BUILD_EXAMPLES OFF)
  add_subdirectory(zxing-cpp)
@@ -51,3 +60,10 @@ index 9303528..549bff3 100644
 +    target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
      target_link_libraries(${PROJECT_NAME} PUBLIC EGL GLESv2)
  endif()
+diff --git a/src/zxing-cpp b/src/zxing-cpp
+index a91d306..d6068bc 160000
+--- a/src/zxing-cpp
++++ b/src/zxing-cpp
+@@ -1 +1 @@
+-Subproject commit a91d3065cc4af1ac335acf3ec1a3956ef82a4930
++Subproject commit d6068bcebeb8fd9f0d35a99b00d202be86a14dbe

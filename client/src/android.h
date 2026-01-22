@@ -19,9 +19,16 @@ QJniObject &contentResolverInstance();
 
 QJniObject getDownloadUri(const QString &fileName);
 
-void urlDonePending(const QJniObject& uri);
+void urlDonePending(const QJniObject &uri);
 
-QColor setMaterialColors();
+struct MaterialThemeColors {
+    QString accent = "Indigo";
+    QString background = "";
+    QString foreground = "";
+    QString primary = "Indigo";
+};
+
+MaterialThemeColors getMaterialTheme();
 
 class AndroidContentFile : public QFile {
     QJniObject _contentUri;

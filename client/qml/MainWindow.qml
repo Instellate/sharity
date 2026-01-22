@@ -9,12 +9,14 @@ ApplicationWindow {
     height: 500
 
     Material.theme: Material.System
-    Material.accent: root.accent
+    Material.accent: MaterialTheme.accent
+    Material.background: MaterialTheme.background
+    Material.foreground: MaterialTheme.foreground
+    Material.primary: MaterialTheme.primary
 
     property bool sasConfirmed: false
     property alias languages: settings.languages
     property var connectUrl: null
-    property string accent: "#9FA8DA"
 
     Connections {
         target: WebSocket

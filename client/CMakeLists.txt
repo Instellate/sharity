@@ -38,7 +38,7 @@ FetchContent_Declare(
   SCodes
   GIT_REPOSITORY https://github.com/somcosoftware/SCodes.git
   SOURCE_SUBDIR src
-  PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/scode-cmake.patch
+  PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/scode.patch
   UPDATE_DISCONNECTED 1)
 
 FetchContent_MakeAvailable(Corrosion SCodes)
@@ -85,6 +85,7 @@ qt_add_executable(sharity-client
         src/DownloaderPeer.cpp
         src/UploaderPeer.cpp
         src/android.cpp
+        src/MaterialTheme.cpp
         ${SHARITY_RESOURCES})
 target_link_libraries(
   sharity-client
@@ -113,8 +114,6 @@ if (WIN32)
  target_link_libraries(sharity-client PRIVATE bcrypt)
 endif ()
 
-message(STATUS ${SCodes_SOURCE_DIR}/zxing-cpp)
-
 target_include_directories(sharity-client PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(sharity-client
                            PUBLIC ${CMAKE_SOURCE_DIR}/../vodozemac/include ${SCodes_SOURCE_DIR} ${SCodes_SOURCE_DIR}/zxing-cpp/core/src)
@@ -138,7 +137,7 @@ qt_add_qml_module(sharity-client
   OUTPUT_DIRECTORY qmlGen
   RESOURCE_PREFIX /qt/qml
   QML_FILES ${QML_FILES}
-  SOURCES src/WebSocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h)
+  SOURCES src/WebSocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h src/MaterialTheme.h)
 
 qt_add_translations(
   sharity-client

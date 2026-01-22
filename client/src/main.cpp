@@ -24,11 +24,6 @@
 #include <QStringList>
 #endif
 
-#ifndef Q_OS_ANDROID
-#include <QStyleHints>
-#endif
-
-
 void logCallback(rtc::LogLevel level, const std::string &message);
 
 void messageHandler(QtMsgType type, const QMessageLogContext &, const QString &message);
@@ -82,24 +77,11 @@ int main(int argc, char **argv) {
         languages.emplaceBack(std::move(language));
     }
 
-#ifdef Q_OS_ANDROID
-    contentResolverInstance();
-    QColor accent = setMaterialColors();
-#else
-    QColor accent;
-    if (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
-        accent = QColor{0x9FA8DA};
-    } else {
-        accent = QColor{0x3F51B5};
-    }
-#endif
-
     QQmlApplicationEngine engine{"Sharity", "MainWindow"};
     // engine.setUiLanguage(QLocale::system().name());
 
     QObject *main = engine.rootObjects().first();
     main->setProperty("languages", languages);
-    main->setProperty("accent", accent.name());
 
     if (argc > 1) {
         const QUrl url{argv[1]};

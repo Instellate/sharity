@@ -10,7 +10,6 @@
 #include <QColor>
 #include <QCoreApplication>
 #include <QDir>
-#include <QGuiApplication>
 #include <QMimeDatabase>
 #include <QStandardPaths>
 #include <QStyleHints>
@@ -115,7 +114,7 @@ QJniObject getAndroidUri(const QString &url) {
             "android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;", QJniObject::fromString(url));
 }
 
-void urlDonePending(const QJniObject& uri) {
+void urlDonePending(const QJniObject &uri) {
     JniContentValues contentValues;
     contentValues.put(MEDIA_COLUMN_IS_PENDING, 0);
 
@@ -138,7 +137,7 @@ constexpr qint32 SYSTEM_BACKGROUND_LIGHT = 0x0106006a;
 constexpr qint32 TEXT_COLOR_PRIMARY = 0x01010036;
 constexpr qint32 COLOR_ACCENT = 0x01010435;
 
-QColor setMaterialColors34() {
+MaterialThemeColors getMaterialTheme34() {
     QJniObject context = QNativeInterface::QAndroidApplication::context();
     QJniObject theme = context.callMethod<jobject>("getTheme", "()Landroid/content/res/Resources$Theme;");
     QJniObject resources = context.callMethod<jobject>("getResources", "()Landroid/content/res/Resources;");
@@ -147,7 +146,7 @@ QColor setMaterialColors34() {
         return resources.callMethod<jint>("getColor", "(ILandroid/content/res/Resources$Theme;)I", jint(id), theme);
     };
 
-    Qt::ColorScheme colorScheme = QGuiApplication::styleHints()->colorScheme();
+    Qt::ColorScheme colorScheme = QApplication::styleHints()->colorScheme();
 
     QRgb primary;
     QRgb background;
@@ -172,22 +171,18 @@ QColor setMaterialColors34() {
     QColor foregroundColor{foreground};
     QColor backgroundColor{background};
 
-    qputenv("QT_QUICK_CONTROLS_MATERIAL_PRIMARY", primaryColor.name().toUtf8());
-    qputenv("QT_QUICK_CONTROLS_MATERIAL_FOREGROUND", foregroundColor.name().toUtf8());
-    qputenv("QT_QUICK_CONTROLS_MATERIAL_BACKGROUND", backgroundColor.name().toUtf8());
-
-    return accentColor;
+    return MaterialThemeColors{.accent = accentColor.name(),
+                               .background = backgroundColor.name(),
+                               .foreground = foregroundColor.name(),
+                               .primary = primaryColor.name()};
 }
 
-QColor setMaterialColors() {
+MaterialThemeColors getMaterialTheme() {
     if (QNativeInterface::QAndroidApplication::sdkVersion() >= 34) {
-        return setMaterialColors34();
+        return getMaterialTheme34();
     }
 
-    if (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
-        return QColor{QRgb{0x9FA8DA}};
-    }
-    return QColor{QRgb{0x3F51B5}};
+    return MaterialThemeColors{};
 }
 
 int AndroidContentFile::openFd(const QJniObject &uri) {
