@@ -59,7 +59,7 @@
         <location filename="../qml/Connect.qml" line="121"/>
         <location filename="../qml/Connect.qml" line="155"/>
         <source>Camera access is disabled</source>
-        <translation>Kameraåtkomst har blivit nekad</translation>
+        <translation>Kameraåtkomst är nekad</translation>
     </message>
 </context>
 <context>

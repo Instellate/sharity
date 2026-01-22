@@ -108,7 +108,8 @@ set_target_properties(sharity-client PROPERTIES
   QT_ANDROID_APP_NAME "Sharity"
   QT_ANDROID_APP_ICON "@mipmap/ic_launcher"
   QT_ANDROID_PACKAGE_NAME "xyz.instellate.sharity"
-  QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android")
+  QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
+  QT_ANDROID_MIN_SDK_VERSION 30)
 
 if (WIN32)
  target_link_libraries(sharity-client PRIVATE bcrypt)
