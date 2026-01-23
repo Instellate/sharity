@@ -71,6 +71,10 @@ if (QT_KNOWN_POLICY_QTP0002)
   qt_policy(SET QTP0002 NEW)
 endif()
 
+if (QT_KNOWN_POLICY_QTP0001)
+  qt_policy(SET QTP0001 NEW)
+endif()
+
 set(RESOURCE_FILES resources.qrc)
 if (EMSCRIPTEN)
   message(STATUS "Adding twemoji resources")
@@ -121,23 +125,17 @@ target_include_directories(sharity-client
 
 file(GLOB_RECURSE QML_FILES ${PROJECT_SOURCE_DIR}/qml/*.qml)
 foreach (QML_FILE IN LISTS QML_FILES)
-  file(RELATIVE_PATH REL "${PROJECT_SOURCE_DIR}" "${QML_FILE}")
-  string(REPLACE "qml/" "./" TRANSFORMED_PATH "${REL}")
-  message(STATUS "Registering QML file: ${QML_FILE}")
-  set_source_files_properties(${QML_FILE} PROPERTIES QT_RESOURCE_ALIAS
-                                                     "${TRANSFORMED_PATH}")
+  file(RELATIVE_PATH TRANSFORMED_PATH "${PROJECT_SOURCE_DIR}" "${QML_FILE}")
+  message(STATUS "Registering QML file: ${TRANSFORMED_PATH}")
+  list(APPEND QML_COMPONENTS ${TRANSFORMED_PATH})
 endforeach ()
 
-set(QML_SINGLETONS src/WebSocket.h)
-set_source_files_properties(${QML_SINGLETONS} PROPERTIES
-                                              QT_QML_SINGLETON_TYPE true)
+set_source_files_properties(qml/utils/Toast.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(sharity-client
   VERSION 1.0
   URI Sharity
-  OUTPUT_DIRECTORY qmlGen
-  RESOURCE_PREFIX /qt/qml
-  QML_FILES ${QML_FILES}
+  QML_FILES ${QML_COMPONENTS}
   SOURCES src/WebSocket.h src/SasVerification.h src/DownloaderPeer.h src/UploaderPeer.h src/MaterialTheme.h)
 
 qt_add_translations(

@@ -4,60 +4,60 @@
 <context>
     <name>Connect</name>
     <message>
-        <location filename="../qml/Connect.qml" line="24"/>
+        <location filename="../qml/Connect.qml" line="23"/>
         <source>WebSocket Relay</source>
         <translation>WebSocket Relay</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="35"/>
+        <location filename="../qml/Connect.qml" line="34"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="40"/>
+        <location filename="../qml/Connect.qml" line="39"/>
         <source>Uploader</source>
         <translation>Uploader</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="45"/>
+        <location filename="../qml/Connect.qml" line="44"/>
         <source>Downloader</source>
         <translation>Downloader</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="68"/>
+        <location filename="../qml/Connect.qml" line="67"/>
         <source>Copy Connection Key</source>
         <translation>Verbindungsschlüssel kopieren</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="73"/>
+        <location filename="../qml/Connect.qml" line="72"/>
         <source>Copied to clipboard</source>
         <translation>In Zwischenablage kopiert</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="87"/>
-        <location filename="../qml/Connect.qml" line="105"/>
-        <location filename="../qml/Connect.qml" line="143"/>
+        <location filename="../qml/Connect.qml" line="86"/>
+        <location filename="../qml/Connect.qml" line="104"/>
+        <location filename="../qml/Connect.qml" line="142"/>
         <source>The key is invalid</source>
         <translation>Der Schlüssel ist ungültig</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="90"/>
+        <location filename="../qml/Connect.qml" line="89"/>
         <source>Connection Key</source>
         <translation>Verbindungsschlüssel</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="96"/>
+        <location filename="../qml/Connect.qml" line="95"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="115"/>
+        <location filename="../qml/Connect.qml" line="114"/>
         <source>Scan QR code</source>
         <translation>QR-Code scannen</translation>
     </message>
     <message>
-        <location filename="../qml/Connect.qml" line="121"/>
-        <location filename="../qml/Connect.qml" line="155"/>
+        <location filename="../qml/Connect.qml" line="120"/>
+        <location filename="../qml/Connect.qml" line="154"/>
         <source>Camera access is disabled</source>
         <translation>Kamerazugriff ist deaktiviert</translation>
     </message>
@@ -99,43 +99,43 @@
 <context>
     <name>HandshakeStatus</name>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="20"/>
+        <location filename="../qml/HandshakeStatus.qml" line="19"/>
         <source>Waiting to be etablished</source>
         <translation>Verbindung wird aufgebaut</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="22"/>
+        <location filename="../qml/HandshakeStatus.qml" line="21"/>
         <source>Waiting for handshake to finish</source>
         <translation>Warte auf Abschluss des Handshakes</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="25"/>
+        <location filename="../qml/HandshakeStatus.qml" line="24"/>
         <source>Established and encrypted</source>
         <translation>Verbindung hergestellt und verschlüsselt</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="44"/>
+        <location filename="../qml/HandshakeStatus.qml" line="43"/>
         <source>Copy Connection Key</source>
         <translation>Verbindungsschlüssel kopieren</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="49"/>
-        <location filename="../qml/HandshakeStatus.qml" line="75"/>
+        <location filename="../qml/HandshakeStatus.qml" line="48"/>
+        <location filename="../qml/HandshakeStatus.qml" line="74"/>
         <source>Copied to clipboard</source>
         <translation>In Zwischenablage kopiert</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="57"/>
+        <location filename="../qml/HandshakeStatus.qml" line="56"/>
         <source>Copy Download URL</source>
         <translation>Kopieren Herunterladen URL</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="81"/>
+        <location filename="../qml/HandshakeStatus.qml" line="80"/>
         <source>Get QR code</source>
         <translation>QR Code abrufen</translation>
     </message>
     <message>
-        <location filename="../qml/HandshakeStatus.qml" line="90"/>
+        <location filename="../qml/HandshakeStatus.qml" line="89"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -189,9 +189,9 @@
     </message>
 </context>
 <context>
-    <name>SettingsPopup</name>
+    <name>SettingsModal</name>
     <message>
-        <location filename="../qml/SettingsPopup.qml" line="60"/>
+        <location filename="../qml/SettingsModal.qml" line="45"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
