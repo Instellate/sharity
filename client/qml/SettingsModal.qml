@@ -29,7 +29,6 @@ Modal {
 
         onLocaleChanged: {
             Qt.uiLanguage = Qt.locale(settings.locale).uiLanguages[0];
-            console.log(Qt.uiLanguage);
         }
     }
 
