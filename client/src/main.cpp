@@ -89,8 +89,6 @@ int main(int argc, char **argv) {
         main->setProperty("connectUrl", url);
     }
 
-    main->setProperty("visible", true);
-
     return app.exec();
 }
 

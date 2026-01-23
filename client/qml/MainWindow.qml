@@ -3,7 +3,7 @@ import QtQuick.Controls.Material
 
 ApplicationWindow {
     id: root
-    visible: false
+    visible: true
     title: "Sharity"
     width: 500
     height: 500
@@ -14,7 +14,7 @@ ApplicationWindow {
     Material.foreground: MaterialTheme.foreground
     Material.primary: MaterialTheme.primary
 
-    property bool sasConfirmed: false
+    property bool sasConfirmed: loader.item?.sasConfirmed
     property alias languages: settings.languages
     property var connectUrl: null
 
@@ -42,20 +42,16 @@ ApplicationWindow {
                 return "Uploader.qml";
             }
         }
-
-        onLoaded: {
-            if (item instanceof Sas) {
-                // Causes bind loop. Maybe do it another way
-                root.sasConfirmed = Qt.binding(() => item.sasConfirmed);
-            }
-        }
     }
 
-    Binding {
+    Connections {
         target: loader.item
-        property: "toast"
-        value: toast
-        when: loader.status == Loader.Ready && (loader.item instanceof Connect || loader.item instanceof HandshakeStatus)
+        enabled: loader.item instanceof Sas
+        ignoreUnknownSignals: true
+
+        function onSasConfirmedChanged() {
+            root.sasConfirmed = loader.item.sasConfirmed
+        }
     }
 
     RoundButton {
@@ -67,14 +63,22 @@ ApplicationWindow {
         onClicked: settings.open()
     }
 
-    SettingsPopup {
+    SettingsModal {
         id: settings
 
         anchors.centerIn: parent
     }
 
-    Toast {
+    ToastPopup {
         id: toast
+    }
+
+    Connections {
+        target: Toast
+
+        function onDispalyMessage(message: string) {
+            toast.display(message)
+        }
     }
 
     onConnectUrlChanged: {

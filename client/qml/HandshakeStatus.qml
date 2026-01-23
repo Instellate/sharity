@@ -5,7 +5,6 @@ import QtQuick.Controls.Material
 
 ColumnLayout {
     id: root
-    property var toast
 
     Settings {
         id: settings
@@ -46,7 +45,7 @@ ColumnLayout {
             connectionKey.selectAll();
             connectionKey.copy();
             connectionKey.deselect();
-            root.toast.display(qsTr("Copied to clipboard"));
+            Toast.display(qsTr("Copied to clipboard"));
         }
     }
 
@@ -72,7 +71,7 @@ ColumnLayout {
             connectionKey.deselect();
 
             connectionKey.text = key;
-            root.toast.display(qsTr("Copied to clipboard"));
+            Toast.display(qsTr("Copied to clipboard"));
         }
     }
 

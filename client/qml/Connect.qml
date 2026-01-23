@@ -13,7 +13,6 @@ ColumnLayout {
     }
 
     property bool isUploader: uploaderRadioButton.checked
-    property var toast
 
     TextField {
         id: websocketUrl
@@ -70,7 +69,7 @@ ColumnLayout {
             connectionKey.selectAll();
             connectionKey.copy();
             connectionKey.deselect();
-            root.toast.display(qsTr("Copied to clipboard"));
+            Toast.display(qsTr("Copied to clipboard"));
         }
     }
 
@@ -84,7 +83,7 @@ ColumnLayout {
             if (WebSocket.isValidKey(text)) {
                 WebSocket.open(websocketUrl.text, text);
             } else {
-                root.toast.display(qsTr("The key is invalid"));
+                Toast.display(qsTr("The key is invalid"));
             }
         }
         placeholderText: qsTr("Connection Key")
@@ -102,7 +101,7 @@ ColumnLayout {
                 if (WebSocket.isValidKey(downloaderKey.text)) {
                     WebSocket.open(websocketUrl.text, downloaderKey.text);
                 } else {
-                    root.toast.display(qsTr("The key is invalid"));
+                    Toast.display(qsTr("The key is invalid"));
                 }
             }
         }
@@ -118,7 +117,7 @@ ColumnLayout {
             if (cameraPermission.status === Qt.Granted) {
                 qrCodeScan.open();
             } else if (cameraPermission.status === Qt.Denied) {
-                root.toast.display(qsTr("Camera access is disabled"));
+                Toast.display(qsTr("Camera access is disabled"));
             } else {
                 cameraPermission.request();
             }
@@ -140,7 +139,7 @@ ColumnLayout {
             if (WebSocket.isValidKey(captured)) {
                 WebSocket.open(websocketUrl.text, captured);
             } else {
-                root.toast.display(qsTr("The key is invalid"));
+                Toast.display(qsTr("The key is invalid"));
             }
         }
     }
@@ -152,7 +151,7 @@ ColumnLayout {
             if (cameraPermission.status === Qt.Granted) {
                 qrCodeScan.open();
             } else if (cameraPermission.status === Qt.Denied) {
-                root.toast.display(qsTr("Camera access is disabled"));
+                Toast.display(qsTr("Camera access is disabled"));
             }
         }
     }
