@@ -38,7 +38,7 @@ jobs:
       - name: Install OpenSSL
         working-directory: ${{ github.workspace }}
         run: |
-          curl.exe -O https://slproweb.com/download/Win64OpenSSL_Light-3_6_0.msi
+          curl.exe -O https://slproweb.com/download/Win64OpenSSL_Light-3_6_1.msi
           msiexec /package Win64OpenSSL_Light-3_6_0.msi /quiet
 
       - name: Restore Cache LibDataChannel

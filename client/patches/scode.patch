@@ -1,14 +1,8 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 9303528..edfccba 100644
+index 31db4b3..b8fee31 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,4 +1,4 @@
--cmake_minimum_required(VERSION 3.1)
-+cmake_minimum_required(VERSION 3.12)
- 
- project(SCodes LANGUAGES CXX)
- option(SCODES_DEBUG OFF)
-@@ -7,7 +7,7 @@ option(SCODES_DEBUG OFF)
+@@ -6,11 +6,10 @@ option(SCODES_DEBUG OFF)
  set(CMAKE_INCLUDE_CURRENT_DIR ON)
  set(CMAKE_AUTOMOC ON)
  set(CMAKE_AUTORCC ON)
@@ -16,50 +10,59 @@ index 9303528..edfccba 100644
 +set(CMAKE_CXX_STANDARD 20)
  set(CMAKE_CXX_STANDARD_REQUIRED ON)
  
- if (NOT DEFINED BUILD_SHARED_LIBS)
-@@ -19,19 +19,13 @@ set(BUILD_BLACKBOX_TESTS OFF)
- set(BUILD_EXAMPLES OFF)
- add_subdirectory(zxing-cpp)
- 
--find_package(QT NAMES Qt5 Qt6 COMPONENTS Core Multimedia Concurrent Quick REQUIRED)
+-find_package(QT NAMES Qt5 Qt6)
 -find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Multimedia Concurrent Quick REQUIRED)
 +find_package(Qt6 REQUIRED COMPONENTS Core Multimedia Concurrent Quick CorePrivate)
  
- file(GLOB SOURCE_CPP
-     "*.cpp"
+ set(COMMON_SOURCES
+     ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeDecoder.cpp
+@@ -282,17 +281,7 @@ set(COMMON_HEADERS
+     ${CMAKE_CURRENT_SOURCE_DIR}/zxing-cpp/core/src/qrcode/QRWriter.h
  )
  
--if(QT_VERSION_MAJOR EQUAL 6)
--    list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeFilter.cpp")
--else()
--    list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeScanner.cpp")
+-if (QT_VERSION_MAJOR EQUAL 6)
+-    set(SRC_FILES ${COMMON_SOURCES}
+-        ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeScanner.cpp
+-    )
+-    set(HEADER_FILES ${COMMON_HEADERS}
+-        ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeScanner.h
+-    )
+-	if(ANDROID)
+-        find_package(Qt6 COMPONENTS GuiPrivate REQUIRED)
+-    endif()
 -endif()
--
 +list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeFilter.cpp")
  
- add_library(${PROJECT_NAME} STATIC ${SOURCE_CPP})
- target_sources(${PROJECT_NAME} PRIVATE private/debug.h)
-@@ -46,18 +40,11 @@ if(SCODES_DEBUG)
- endif()
+ if (QT_VERSION_MAJOR EQUAL 5)
+     set(SRC_FILES ${COMMON_SOURCES}
+@@ -322,10 +311,10 @@ endif()
  
  
--target_link_libraries(${PROJECT_NAME} PUBLIC ZXing Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Quick)
-+target_link_libraries(${PROJECT_NAME} PRIVATE ZXing Qt6::Core Qt6::Multimedia Qt6::Concurrent Qt6::Quick)
- target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
- target_include_directories(${PROJECT_NAME} PRIVATE  "${CMAKE_CURRENT_SOURCE_DIR}/private")
+ target_link_libraries(${PROJECT_NAME} PUBLIC
+-    Qt${QT_VERSION_MAJOR}::Core
+-    Qt${QT_VERSION_MAJOR}::Multimedia
+-    Qt${QT_VERSION_MAJOR}::Concurrent
+-    Qt${QT_VERSION_MAJOR}::Quick
++    Qt6::Core
++    Qt6::Multimedia
++    Qt6::Concurrent
++    Qt6::Quick
+ )
+ target_include_directories(${PROJECT_NAME} 
+     PUBLIC
+@@ -335,11 +324,4 @@ target_include_directories(${PROJECT_NAME}
+         ${CMAKE_CURRENT_SOURCE_DIR}/private
+ )
  
- if (ANDROID)
--
+-if (ANDROID)
 -    if(QT_VERSION_MAJOR EQUAL 5)
--        find_package(Qt${QT_VERSION_MAJOR} COMPONENTS AndroidExtras REQUIRED)
--        target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::AndroidExtras)
+-        target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::AndroidExtras)
 -    else()
--        target_link_libraries(${PROJECT_NAME} PUBLIC Qt::CorePrivate)
+-        target_link_libraries(${PROJECT_NAME} PUBLIC Qt::GuiPrivate)
 -    endif()
 -
-+    target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
-     target_link_libraries(${PROJECT_NAME} PUBLIC EGL GLESv2)
- endif()
+-endif()
++target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
 diff --git a/src/zxing-cpp b/src/zxing-cpp
 index a91d306..d6068bc 160000
 --- a/src/zxing-cpp
