@@ -1,5 +1,5 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 31db4b3..b8fee31 100644
+index 31db4b3..835bc75 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -6,11 +6,10 @@ option(SCODES_DEBUG OFF)
@@ -16,7 +16,7 @@ index 31db4b3..b8fee31 100644
  
  set(COMMON_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeDecoder.cpp
-@@ -282,17 +281,7 @@ set(COMMON_HEADERS
+@@ -282,29 +281,14 @@ set(COMMON_HEADERS
      ${CMAKE_CURRENT_SOURCE_DIR}/zxing-cpp/core/src/qrcode/QRWriter.h
  )
  
@@ -31,11 +31,30 @@ index 31db4b3..b8fee31 100644
 -        find_package(Qt6 COMPONENTS GuiPrivate REQUIRED)
 -    endif()
 -endif()
-+list(FILTER SOURCE_CPP EXCLUDE REGEX "SBarcodeFilter.cpp")
+-
+-if (QT_VERSION_MAJOR EQUAL 5)
+-    set(SRC_FILES ${COMMON_SOURCES}
+-        ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeFilter.cpp
+-    )
+-    set(HEADER_FILES ${COMMON_HEADERS}
+-        ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeFilter.h
+-    )
+-    
+-    if(ANDROID)
+-        find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
+-    endif()
++set(SRC_FILES ${COMMON_SOURCES}
++    ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeScanner.cpp
++)
++set(HEADER_FILES ${COMMON_HEADERS}
++    ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeScanner.h
++)
++if(ANDROID)
++    find_package(Qt6 COMPONENTS GuiPrivate REQUIRED)
+ endif()
  
- if (QT_VERSION_MAJOR EQUAL 5)
-     set(SRC_FILES ${COMMON_SOURCES}
-@@ -322,10 +311,10 @@ endif()
+ 
+@@ -322,10 +306,10 @@ endif()
  
  
  target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -50,11 +69,10 @@ index 31db4b3..b8fee31 100644
  )
  target_include_directories(${PROJECT_NAME} 
      PUBLIC
-@@ -335,11 +324,4 @@ target_include_directories(${PROJECT_NAME}
-         ${CMAKE_CURRENT_SOURCE_DIR}/private
+@@ -336,10 +320,5 @@ target_include_directories(${PROJECT_NAME}
  )
  
--if (ANDROID)
+ if (ANDROID)
 -    if(QT_VERSION_MAJOR EQUAL 5)
 -        target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::AndroidExtras)
 -    else()
@@ -62,7 +80,8 @@ index 31db4b3..b8fee31 100644
 -    endif()
 -
 -endif()
-+target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
++    target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
++endif ()
 diff --git a/src/zxing-cpp b/src/zxing-cpp
 index a91d306..d6068bc 160000
 --- a/src/zxing-cpp
