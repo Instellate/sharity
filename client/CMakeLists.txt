@@ -38,7 +38,9 @@ FetchContent_Declare(
   SCodes
   GIT_REPOSITORY https://github.com/somcosoftware/SCodes.git
   GIT_TAG f20609213875ee9280136598a6f5f5178ef71361
-  SOURCE_SUBDIR src)
+  SOURCE_SUBDIR src
+  PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/scode.patch
+  UPDATE_DISCONNECTED 1)
 
 FetchContent_MakeAvailable(Corrosion SCodes)
 
