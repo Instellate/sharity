@@ -37,9 +37,8 @@ FetchContent_Declare(
 FetchContent_Declare(
   SCodes
   GIT_REPOSITORY https://github.com/somcosoftware/SCodes.git
-  SOURCE_SUBDIR src
-  PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/scode.patch
-  UPDATE_DISCONNECTED 1)
+  GIT_TAG f20609213875ee9280136598a6f5f5178ef71361
+  SOURCE_SUBDIR src)
 
 FetchContent_MakeAvailable(Corrosion SCodes)
 
@@ -184,8 +183,8 @@ elseif (APPLE AND CONFIGURE_BUNDLE)
   set_target_properties(sharity-client PROPERTIES MACOSX_BUNDLE TRUE)
   set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/bundle/sharity.icns"
                               MACOSX_PACKAGE_LOCATION "Resources")
-  set_target_properties(sharity-client PROPERTIES
-    PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/bundle/Info.plist")
+  set_target_properties(sharity-client PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/bundle/Info.plist")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
 endif ()
 
 if (DEFINED CPACK_GENERATOR)
