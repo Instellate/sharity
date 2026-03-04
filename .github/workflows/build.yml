@@ -83,10 +83,10 @@ jobs:
         working-directory: ${{ github.workspace }}/client/build
         run: cpack .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           path: ${{ github.workspace }}/client/build/Sharity-*-win64.exe
-          name: 'windows-build'
+          archive: false
 
       - name: Save Cache LibDataChannel
         id: cache-libdatachannel-save
@@ -275,7 +275,7 @@ jobs:
           ./configure-android.sh
           cmake --build build-android --target apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           path: ${{ github.workspace }}/client/build-android/android-build/sharity-client.apk
-          name: 'android-build'
+          archive: false
