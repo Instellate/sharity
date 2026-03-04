@@ -3,12 +3,12 @@ import QtQuick
 pragma Singleton
 
 Item {
-    signal dispalyMessage(message: string)
+    signal displayMessage(message: string)
 
     readonly property string test: "Test"
 
     function display(message: string) {
-        dispalyMessage(message)
+        displayMessage(message)
     }
 }
 
