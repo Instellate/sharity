@@ -1,8 +1,8 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 31db4b3..835bc75 100644
+index 31db4b3..22759ec 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -6,11 +6,10 @@ option(SCODES_DEBUG OFF)
+@@ -6,11 +6,15 @@ option(SCODES_DEBUG OFF)
  set(CMAKE_INCLUDE_CURRENT_DIR ON)
  set(CMAKE_AUTOMOC ON)
  set(CMAKE_AUTORCC ON)
@@ -12,11 +12,16 @@ index 31db4b3..835bc75 100644
  
 -find_package(QT NAMES Qt5 Qt6)
 -find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Multimedia Concurrent Quick REQUIRED)
-+find_package(Qt6 REQUIRED COMPONENTS Core Multimedia Concurrent Quick CorePrivate)
++if (ANDROID)
++    set(QT_NO_PRIVATE_MODULE_WARNING ON)
++    find_package(Qt6 REQUIRED COMPONENTS Core Multimedia Concurrent Quick CorePrivate)
++else ()
++    find_package(Qt6 REQUIRED COMPONENTS Core Multimedia Concurrent Quick)
++endif ()
  
  set(COMMON_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/SBarcodeDecoder.cpp
-@@ -282,29 +281,14 @@ set(COMMON_HEADERS
+@@ -282,29 +286,14 @@ set(COMMON_HEADERS
      ${CMAKE_CURRENT_SOURCE_DIR}/zxing-cpp/core/src/qrcode/QRWriter.h
  )
  
@@ -54,7 +59,7 @@ index 31db4b3..835bc75 100644
  endif()
  
  
-@@ -322,10 +306,10 @@ endif()
+@@ -322,10 +311,10 @@ endif()
  
  
  target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -69,7 +74,7 @@ index 31db4b3..835bc75 100644
  )
  target_include_directories(${PROJECT_NAME} 
      PUBLIC
-@@ -336,10 +320,5 @@ target_include_directories(${PROJECT_NAME}
+@@ -336,10 +325,5 @@ target_include_directories(${PROJECT_NAME}
  )
  
  if (ANDROID)
@@ -82,10 +87,29 @@ index 31db4b3..835bc75 100644
 -endif()
 +    target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::CorePrivate)
 +endif ()
-diff --git a/src/zxing-cpp b/src/zxing-cpp
-index a91d306..d6068bc 160000
---- a/src/zxing-cpp
-+++ b/src/zxing-cpp
-@@ -1 +1 @@
--Subproject commit a91d3065cc4af1ac335acf3ec1a3956ef82a4930
-+Subproject commit d6068bcebeb8fd9f0d35a99b00d202be86a14dbe
+diff --git a/src/SBarcodeDecoder.cpp b/src/SBarcodeDecoder.cpp
+index a33377d..69a059e 100644
+--- a/src/SBarcodeDecoder.cpp
++++ b/src/SBarcodeDecoder.cpp
+@@ -141,7 +141,7 @@ bool SBarcodeDecoder::  isDecoding() const
+ void SBarcodeDecoder::process(const QImage& capturedImage, ZXing::BarcodeFormats formats)
+ {
+     // This will set the "isDecoding" to false automatically
+-    auto decodeGuard = qScopeGuard([=](){setIsDecoding(false);});
++    auto decodeGuard = qScopeGuard([this](){setIsDecoding(false);});
+     SCODES_MEASURE(time);
+     setIsDecoding(true);
+ 
+diff --git a/src/SBarcodeScanner.cpp b/src/SBarcodeScanner.cpp
+index 247b6e9..d0a7a55 100644
+--- a/src/SBarcodeScanner.cpp
++++ b/src/SBarcodeScanner.cpp
+@@ -68,7 +68,7 @@ void SBarcodeScanner::tryProcessFrame(const QVideoFrame& frame)
+     // Invoke processing asynchronously, potential result will be reported by capturedChanged signal
+     // We can copy QVideoFrame as it's explicitly shared (just like std::shared_ptr)
+     // Note the releasing the guard variable
+-    QMetaObject::invokeMethod(&m_decoder, [=](){
++    QMetaObject::invokeMethod(&m_decoder, [this, frame, cRect](){
+         m_decoder.process(m_decoder.videoFrameToImage(frame, cRect),SCodes::toZXingFormat(SCodes::SBarcodeFormat::Basic));
+         m_frameProcessingInProgress = false;
+     });

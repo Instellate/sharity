@@ -50,7 +50,7 @@ ApplicationWindow {
         ignoreUnknownSignals: true
 
         function onSasConfirmedChanged() {
-            root.sasConfirmed = loader.item.sasConfirmed
+            root.sasConfirmed = loader.item.sasConfirmed;
         }
     }
 
@@ -76,8 +76,8 @@ ApplicationWindow {
     Connections {
         target: Toast
 
-        function onDispalyMessage(message: string) {
-            toast.display(message)
+        function onDisplayMessage(message: string) {
+            toast.display(message);
         }
     }
 
