@@ -34,6 +34,7 @@ Modal {
         id: image
         width: 200
         height: 200
+        cache: false
 
         anchors.centerIn: parent
     }

@@ -253,8 +253,9 @@ WebSocket::WebSocket(QObject *parent) : QObject(parent) {
 
         emit connectedChanged();
         emit encryptedChanged();
-        emit connectedChanged();
+        emit establishedChanged();
         emit connectingChanged();
+        emit publicKeyChanged();
         emit stunServersChanged();
         emit isDownloaderChanged();
     });
@@ -273,6 +274,8 @@ void WebSocket::open(const QString &url, QString publicKey) {
     fullUrl.setQuery(query);
 
     this->_publicKey = vodozemac::Ed25519PublicKey::fromBase64(pubKeyCopy.toStdString());
+    emit publicKeyChanged();
+
     this->_ws.onMessage([this](auto message) { this->onMessage(std::move(message)); });
     this->_ws.open(fullUrl.toString().toStdString());
     emit isDownloaderChanged();
