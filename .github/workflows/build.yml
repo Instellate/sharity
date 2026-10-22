@@ -24,7 +24,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.9.1'
+          version: '6.12'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
           modules: qtmultimedia
@@ -38,7 +38,7 @@ jobs:
       - name: Install OpenSSL
         working-directory: ${{ github.workspace }}
         run: |
-          curl.exe -O https://slproweb.com/download/Win64OpenSSL_Light-3_6_1.msi
+          curl.exe -O https://slproweb.com/download/Win64OpenSSL_Light-3_6_5.msi
           msiexec /package Win64OpenSSL_Light-3_6_1.msi /quiet
 
       - name: Restore Cache LibDataChannel
@@ -126,7 +126,7 @@ jobs:
         with:
           host: linux
           modules: qtmultimedia
-          version: '6.10.1'
+          version: '6.12'
           dir: ${{ github.workspace }}
 
       - name: Cache LibDataChannel
@@ -169,7 +169,7 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     env:
-      QT_VERSION: '6.10.1'
+      QT_VERSION: '6.12'
       NDK_VERSION: '29.0.13846066'
 
     steps:
